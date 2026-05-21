@@ -48,3 +48,8 @@ dev.db
 *.db
 
 .vercel
+
+# SQLite local dev database
+/db
+/db-wal
+/db-shm
