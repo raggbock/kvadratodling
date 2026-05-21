@@ -33,7 +33,7 @@ export default async function BedPage({
   });
 
   // Build a palette merging DB plants with catalog emojis
-  const palette = dbPlants.map((p) => {
+  const palette = dbPlants.map((p: { slug: string; commonName: string }) => {
     const catalogMatch = CATALOG_PLANTS.find((c) => c.slug === p.slug);
     return { slug: p.slug, name: p.commonName, emoji: catalogMatch?.emoji ?? '🌱' };
   });
