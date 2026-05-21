@@ -6,7 +6,6 @@ generator client {
 // Switch provider to "postgresql" and restore @db.Date / @db.Decimal annotations when connecting to Supabase
 datasource db {
   provider = "sqlite"
-  url      = env("DATABASE_URL")
 }
 
 // id = auth.users.id from Supabase Auth (UUID set by caller, not generated here)

@@ -1,6 +1,9 @@
+import "dotenv/config";
+import { PrismaLibSql } from "@prisma/adapter-libsql";
 import { PrismaClient, SunRequirement, WaterNeed, CompatibilityType } from "@prisma/client";
 
-const prisma = new PrismaClient();
+const adapter = new PrismaLibSql({ url: process.env.DATABASE_URL ?? "file:./dev.db" });
+const prisma = new PrismaClient({ adapter });
 
 // Planting schedule fields use days relative to last frost date:
 //   sowIndoorsDaysBeforeFrost: positive = N days BEFORE last frost
