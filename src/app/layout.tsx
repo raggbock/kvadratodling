@@ -1,18 +1,19 @@
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
+import { DM_Serif_Display, DM_Sans } from 'next/font/google';
 import Link from 'next/link';
 import { PostHogProvider } from '@/components/PostHogProvider';
 import { SignOutButton } from '@/components/SignOutButton';
 import './globals.css';
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
+const dmSerifDisplay = DM_Serif_Display({
+  weight: '400',
   subsets: ['latin'],
+  variable: '--font-dm-serif-display',
 });
 
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
+const dmSans = DM_Sans({
   subsets: ['latin'],
+  variable: '--font-dm-sans',
 });
 
 export const metadata: Metadata = {
@@ -42,21 +43,21 @@ export default async function RootLayout({
   const user = await getUser();
 
   return (
-    <html lang="sv" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
-      <body className="flex min-h-full flex-col bg-gray-50">
+    <html lang="sv" className={`${dmSerifDisplay.variable} ${dmSans.variable} h-full antialiased`}>
+      <body className="flex min-h-full flex-col bg-surface-page text-text-default">
         <PostHogProvider>
-          <header className="border-b border-gray-200 bg-white">
+          <header className="border-b border-border-default bg-surface-default">
             <div className="mx-auto flex max-w-7xl items-center gap-6 px-4 py-3 sm:px-6 lg:px-8">
-              <Link href="/" className="flex items-center gap-2 font-bold text-green-700">
+              <Link href="/" className="flex items-center gap-2 font-semibold text-brand-default">
                 <span className="text-xl">🌱</span>
                 <span>Kvadratodling</span>
               </Link>
-              <nav className="flex flex-1 items-center gap-4 text-sm text-gray-600">
-                <Link href="/catalog" className="hover:text-green-700">
+              <nav className="flex flex-1 items-center gap-4 text-sm text-text-subtle">
+                <Link href="/catalog" className="hover:text-brand-default">
                   Plant catalog
                 </Link>
                 {user && (
-                  <Link href="/gardens" className="hover:text-green-700">
+                  <Link href="/gardens" className="hover:text-brand-default">
                     My gardens
                   </Link>
                 )}
@@ -64,13 +65,13 @@ export default async function RootLayout({
               <div className="flex items-center gap-3">
                 {user ? (
                   <>
-                    <span className="hidden text-sm text-gray-500 sm:block">{user.email}</span>
+                    <span className="hidden text-sm text-text-muted sm:block">{user.email}</span>
                     <SignOutButton />
                   </>
                 ) : (
                   <Link
                     href="/auth/login"
-                    className="rounded-md bg-green-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-green-700"
+                    className="rounded-md bg-brand-default px-3 py-1.5 text-sm font-medium text-text-inverse hover:bg-brand-emphasis"
                   >
                     Sign in
                   </Link>
@@ -79,7 +80,7 @@ export default async function RootLayout({
             </div>
           </header>
           <main className="flex-1">{children}</main>
-          <footer className="border-t border-gray-100 py-6 text-center text-xs text-gray-400">
+          <footer className="border-t border-border-subtle py-6 text-center text-xs text-text-muted">
             Kvadratodling — square-foot garden planner
           </footer>
         </PostHogProvider>
