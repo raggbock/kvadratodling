@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import Link from 'next/link';
-import { ClerkProvider, SignInButton, Show, UserButton } from '@clerk/nextjs';
 import { PostHogProvider } from '@/components/PostHogProvider';
 import './globals.css';
 
@@ -20,11 +19,36 @@ export const metadata: Metadata = {
   description: 'Plan your square-foot garden, browse plants, and get companion-planting hints.',
 };
 
-export default function RootLayout({
+// Clerk is loaded dynamically so staging works before Clerk keys are configured.
+const clerkConfigured = !!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+
+type FC<P = Record<string, never>> = (props: P) => React.ReactNode;
+
+async function getClerkComponents() {
+  if (!clerkConfigured) {
+    return {
+      ClerkProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+      SignInButton: () => null as React.ReactNode,
+      Show: () => null as React.ReactNode,
+      UserButton: () => null as React.ReactNode,
+    };
+  }
+  const clerk = await import('@clerk/nextjs');
+  return {
+    ClerkProvider: clerk.ClerkProvider as FC<{ children: React.ReactNode }>,
+    SignInButton: clerk.SignInButton as FC<{ mode?: string; children?: React.ReactNode }>,
+    Show: clerk.Show as FC<{ when: string; children?: React.ReactNode }>,
+    UserButton: clerk.UserButton as FC,
+  };
+}
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const { ClerkProvider, SignInButton, Show, UserButton } = await getClerkComponents();
+
   return (
     <ClerkProvider>
       <html lang="sv" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
