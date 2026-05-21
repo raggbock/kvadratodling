@@ -1,7 +1,12 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { PLANTS, type Plant } from '@/lib/plants';
+
+interface PalettePlant {
+  slug: string;
+  name: string;
+  emoji: string;
+}
 
 interface SlotData {
   row: number;
@@ -16,9 +21,10 @@ interface BedPlannerProps {
   rows: number;
   cols: number;
   initialSlots: SlotData[];
+  palette: PalettePlant[];
 }
 
-export default function BedPlanner({ bedId, rows, cols, initialSlots }: BedPlannerProps) {
+export default function BedPlanner({ bedId, rows, cols, initialSlots, palette }: BedPlannerProps) {
   const [slots, setSlots] = useState<Map<string, SlotData>>(() => {
     const m = new Map<string, SlotData>();
     for (const s of initialSlots) {
@@ -26,22 +32,22 @@ export default function BedPlanner({ bedId, rows, cols, initialSlots }: BedPlann
     }
     return m;
   });
-  const [selectedPlant, setSelectedPlant] = useState<Plant | null>(PLANTS[0]);
+  const [selectedSlug, setSelectedSlug] = useState<string | null>(palette[0]?.slug ?? null);
   const [saving, setSaving] = useState<string | null>(null);
   const [search, setSearch] = useState('');
 
-  const filteredPlants = PLANTS.filter(
-    (p) =>
-      p.name.toLowerCase().includes(search.toLowerCase()) ||
-      p.nameSv.toLowerCase().includes(search.toLowerCase())
+  const selectedPlant = palette.find((p) => p.slug === selectedSlug) ?? null;
+
+  const filteredPlants = palette.filter((p) =>
+    p.name.toLowerCase().includes(search.toLowerCase())
   );
 
   const handleCellClick = useCallback(
     async (row: number, col: number) => {
       const key = `${row}:${col}`;
       const existing = slots.get(key);
-      const isSamePlant = existing?.plantSlug === selectedPlant?.slug;
-      const newSlug = isSamePlant ? null : (selectedPlant?.slug ?? null);
+      const isSamePlant = existing?.plantSlug === selectedSlug;
+      const newSlug = isSamePlant ? null : selectedSlug;
 
       setSaving(key);
 
@@ -58,12 +64,13 @@ export default function BedPlanner({ bedId, rows, cols, initialSlots }: BedPlann
           if (newSlug === null) {
             next.delete(key);
           } else {
+            const plant = palette.find((p) => p.slug === newSlug);
             next.set(key, {
               row,
               col,
               plantSlug: newSlug,
-              plantEmoji: selectedPlant?.emoji ?? null,
-              plantName: selectedPlant?.name ?? null,
+              plantEmoji: plant?.emoji ?? null,
+              plantName: plant?.name ?? null,
             });
           }
           return next;
@@ -74,7 +81,7 @@ export default function BedPlanner({ bedId, rows, cols, initialSlots }: BedPlann
         setSaving(null);
       }
     },
-    [bedId, selectedPlant, slots]
+    [bedId, selectedSlug, slots, palette]
   );
 
   const filledCount = slots.size;
@@ -88,14 +95,14 @@ export default function BedPlanner({ bedId, rows, cols, initialSlots }: BedPlann
           <div className="border-b border-gray-100 px-4 py-3">
             <h2 className="text-sm font-semibold text-gray-700">Plant palette</h2>
             <button
-              onClick={() => setSelectedPlant(null)}
+              onClick={() => setSelectedSlug(null)}
               className={`mt-2 w-full rounded-md border px-3 py-1.5 text-sm transition ${
-                selectedPlant === null
+                selectedSlug === null
                   ? 'border-red-400 bg-red-50 font-medium text-red-700'
                   : 'border-gray-300 text-gray-500 hover:bg-gray-50'
               }`}
             >
-              🗑 Erase
+              🗑 Erase mode
             </button>
           </div>
           <div className="p-3">
@@ -110,16 +117,15 @@ export default function BedPlanner({ bedId, rows, cols, initialSlots }: BedPlann
               {filteredPlants.map((plant) => (
                 <li key={plant.slug}>
                   <button
-                    onClick={() => setSelectedPlant(plant)}
+                    onClick={() => setSelectedSlug(plant.slug)}
                     className={`flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm transition ${
-                      selectedPlant?.slug === plant.slug
+                      selectedSlug === plant.slug
                         ? 'bg-green-100 font-medium text-green-800 ring-1 ring-green-300'
                         : 'text-gray-700 hover:bg-gray-50'
                     }`}
                   >
                     <span className="text-base">{plant.emoji}</span>
                     <span className="flex-1">{plant.name}</span>
-                    <span className="text-xs text-gray-400">{plant.nameSv}</span>
                   </button>
                 </li>
               ))}
@@ -135,13 +141,15 @@ export default function BedPlanner({ bedId, rows, cols, initialSlots }: BedPlann
             {filledCount} / {total} squares planted
           </span>
           <span>
-            Click a square to plant{' '}
             {selectedPlant ? (
-              <strong className="text-gray-700">
-                {selectedPlant.emoji} {selectedPlant.name}
-              </strong>
+              <>
+                Planting{' '}
+                <strong className="text-gray-700">
+                  {selectedPlant.emoji} {selectedPlant.name}
+                </strong>
+              </>
             ) : (
-              <strong className="text-red-600">eraser</strong>
+              <strong className="text-red-600">Erasing</strong>
             )}
           </span>
         </div>
@@ -155,7 +163,7 @@ export default function BedPlanner({ bedId, rows, cols, initialSlots }: BedPlann
               const key = `${r}:${c}`;
               const slot = slots.get(key);
               const isSaving = saving === key;
-              const isTarget = slot?.plantSlug === selectedPlant?.slug;
+              const isCurrentPlant = slot?.plantSlug === selectedSlug;
 
               return (
                 <button
@@ -163,12 +171,12 @@ export default function BedPlanner({ bedId, rows, cols, initialSlots }: BedPlann
                   onClick={() => handleCellClick(r, c)}
                   title={slot ? `${slot.plantName} — click to remove` : `Plant ${selectedPlant?.name ?? 'nothing'}`}
                   className={`
-                    flex h-12 w-12 items-center justify-center rounded-lg border text-2xl transition
+                    flex h-12 w-12 items-center justify-center rounded-lg border text-2xl transition select-none
                     sm:h-14 sm:w-14
                     ${isSaving ? 'animate-pulse opacity-60' : ''}
                     ${slot
-                      ? isTarget
-                        ? 'border-green-400 bg-green-50 ring-2 ring-green-300 hover:bg-red-50'
+                      ? isCurrentPlant
+                        ? 'border-green-400 bg-green-50 ring-2 ring-green-300 hover:bg-red-50 hover:ring-red-200'
                         : 'border-green-300 bg-green-50 hover:border-red-300 hover:bg-red-50'
                       : 'border-dashed border-gray-200 bg-gray-50 hover:border-green-300 hover:bg-green-50'
                     }
@@ -189,9 +197,7 @@ export default function BedPlanner({ bedId, rows, cols, initialSlots }: BedPlann
             </h3>
             <div className="flex flex-wrap gap-2">
               {Array.from(
-                new Map(
-                  Array.from(slots.values()).map((s) => [s.plantSlug, s])
-                ).values()
+                new Map(Array.from(slots.values()).map((s) => [s.plantSlug, s])).values()
               ).map((s) => {
                 const count = Array.from(slots.values()).filter(
                   (x) => x.plantSlug === s.plantSlug

@@ -10,7 +10,6 @@ export async function requireUser() {
     update: {},
     create: {
       id: userId,
-      clerkId: userId,
       email: `${userId}@placeholder.local`,
     },
   });
