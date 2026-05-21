@@ -1,6 +1,6 @@
-import { auth } from '@clerk/nextjs/server';
 import { notFound, redirect } from 'next/navigation';
 import Link from 'next/link';
+import { createClient } from '@/utils/supabase/server';
 import { prisma } from '@/lib/prisma';
 import { getPlant, PLANTS as CATALOG_PLANTS } from '@/lib/plants';
 import BedPlanner from './BedPlanner';
@@ -10,15 +10,16 @@ export default async function BedPage({
 }: {
   params: Promise<{ gardenId: string; bedId: string }>;
 }) {
-  const { userId } = await auth();
-  if (!userId) redirect('/');
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect('/auth/login');
 
   const { gardenId, bedId } = await params;
-  const user = await prisma.user.findUnique({ where: { id: userId } });
-  if (!user) redirect('/gardens');
+  const dbUser = await prisma.user.findUnique({ where: { id: user.id } });
+  if (!dbUser) redirect('/gardens');
 
   const bed = await prisma.bed.findFirst({
-    where: { id: bedId, garden: { id: gardenId, userId: user.id } },
+    where: { id: bedId, garden: { id: gardenId, userId: dbUser.id } },
     include: {
       garden: { select: { name: true } },
       plantingSlots: { include: { plant: { select: { slug: true, commonName: true } } } },

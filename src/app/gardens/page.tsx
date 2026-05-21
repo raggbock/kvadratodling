@@ -1,18 +1,19 @@
-import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
+import { createClient } from '@/utils/supabase/server';
 import { prisma } from '@/lib/prisma';
 
 export const metadata = { title: 'My Gardens — Kvadratodling' };
 
 export default async function GardensPage() {
-  const { userId } = await auth();
-  if (!userId) redirect('/');
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect('/auth/login');
 
-  const user = await prisma.user.findUnique({ where: { id: userId } });
-  const gardens = user
+  const dbUser = await prisma.user.findUnique({ where: { id: user.id } });
+  const gardens = dbUser
     ? await prisma.garden.findMany({
-        where: { userId: user.id },
+        where: { userId: dbUser.id },
         include: { beds: { select: { id: true } } },
         orderBy: { createdAt: 'desc' },
       })

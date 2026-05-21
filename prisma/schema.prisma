@@ -3,9 +3,8 @@ generator client {
   output   = "../node_modules/.prisma/client"
 }
 
-// Switch provider to "postgresql" and restore @db.Date / @db.Decimal annotations when connecting to Supabase
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
 }
 
 // id = auth.users.id from Supabase Auth (UUID set by caller, not generated here)
@@ -27,7 +26,7 @@ model Garden {
   name          String
   description   String?
   location      String?
-  lastFrostDate DateTime? @map("last_frost_date")
+  lastFrostDate DateTime? @map("last_frost_date") @db.Date
   createdAt     DateTime  @default(now()) @map("created_at")
   updatedAt     DateTime  @updatedAt @map("updated_at")
 
@@ -62,7 +61,7 @@ model Plant {
   family              String?
   emoji               String   @default("🌱")
   // How many plants fit in 1 sq ft (e.g. 16 for radish, 0.25 for zucchini)
-  plantsPerSqft       Decimal  @map("plants_per_sqft")
+  plantsPerSqft       Decimal  @db.Decimal(10, 4) @map("plants_per_sqft")
   sunRequirement      SunRequirement @map("sun_requirement")
   waterNeed           WaterNeed      @map("water_need")
   daysToMaturityMin   Int?     @map("days_to_maturity_min")

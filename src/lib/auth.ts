@@ -1,18 +1,20 @@
-import { auth } from '@clerk/nextjs/server';
+import { createClient } from '@/utils/supabase/server';
 import { prisma } from './prisma';
 
 export async function requireUser() {
-  const { userId } = await auth();
-  if (!userId) throw new Error('Unauthorized');
+  const supabase = await createClient();
+  const { data: { user }, error } = await supabase.auth.getUser();
+  if (!user || error) throw new Error('Unauthorized');
 
-  const user = await prisma.user.upsert({
-    where: { id: userId },
-    update: {},
+  const dbUser = await prisma.user.upsert({
+    where: { id: user.id },
+    update: { email: user.email! },
     create: {
-      id: userId,
-      email: `${userId}@placeholder.local`,
+      id: user.id,
+      email: user.email!,
+      name: (user.user_metadata?.full_name ?? user.user_metadata?.name) as string | null ?? null,
     },
   });
 
-  return user;
+  return dbUser;
 }
