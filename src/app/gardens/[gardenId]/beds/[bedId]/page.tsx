@@ -38,7 +38,7 @@ export default async function BedPage({
     return { slug: p.slug, name: p.commonName, emoji: catalogMatch?.emoji ?? '🌱' };
   });
 
-  const initialSlots = bed.plantingSlots.map((s) => {
+  const initialSlots = bed.plantingSlots.map((s: { row: number; col: number; plant: { slug: string; commonName: string } | null }) => {
     const catalogPlant = s.plant ? getPlant(s.plant.slug) : null;
     const paletteMatch = s.plant ? palette.find((p) => p.slug === s.plant!.slug) : null;
     return {
