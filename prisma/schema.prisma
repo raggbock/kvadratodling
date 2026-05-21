@@ -1,0 +1,142 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
+}
+
+// Switch provider to "postgresql" and restore @db.Date / @db.Decimal annotations when connecting to Supabase
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// id = auth.users.id from Supabase Auth (UUID set by caller, not generated here)
+model User {
+  id        String   @id
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  gardens Garden[]
+
+  @@map("users")
+}
+
+model Garden {
+  id            String    @id @default(uuid())
+  userId        String    @map("user_id")
+  name          String
+  description   String?
+  location      String?
+  lastFrostDate DateTime? @map("last_frost_date")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  beds Bed[]
+
+  @@map("gardens")
+}
+
+model Bed {
+  id        String   @id @default(uuid())
+  gardenId  String   @map("garden_id")
+  name      String
+  rows      Int
+  cols      Int
+  notes     String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  garden        Garden         @relation(fields: [gardenId], references: [id], onDelete: Cascade)
+  plantingSlots PlantingSlot[]
+
+  @@map("beds")
+}
+
+// Species catalog — shared, not user-owned
+model Plant {
+  id                  String   @id @default(uuid())
+  slug                String   @unique
+  commonName          String   @map("common_name")
+  scientificName      String?  @map("scientific_name")
+  family              String?
+  emoji               String   @default("🌱")
+  // How many plants fit in 1 sq ft (e.g. 16 for radish, 0.25 for zucchini)
+  plantsPerSqft       Decimal  @map("plants_per_sqft")
+  sunRequirement      SunRequirement @map("sun_requirement")
+  waterNeed           WaterNeed      @map("water_need")
+  daysToMaturityMin   Int?     @map("days_to_maturity_min")
+  daysToMaturityMax   Int?     @map("days_to_maturity_max")
+  frostTolerant       Boolean  @default(false) @map("frost_tolerant")
+  // Planting schedule relative to last frost date (days)
+  // Positive = N days BEFORE last frost; negative = N days AFTER last frost
+  sowIndoorsDaysBeforeFrost  Int? @map("sow_indoors_days_before_frost")
+  directSowDaysBeforeFrost   Int? @map("direct_sow_days_before_frost")
+  transplantDaysAfterFrost   Int? @map("transplant_days_after_frost")
+  notes               String?
+  imageUrl            String?  @map("image_url")
+  isActive            Boolean  @default(true) @map("is_active")
+  createdAt           DateTime @default(now()) @map("created_at")
+
+  plantingSlots       PlantingSlot[]
+  companions          PlantCompatibility[] @relation("PlantCompat_plant")
+  compatibilityWith   PlantCompatibility[] @relation("PlantCompat_other")
+
+  @@map("plants")
+}
+
+model PlantCompatibility {
+  id           String               @id @default(uuid())
+  plantId      String               @map("plant_id")
+  otherPlantId String               @map("other_plant_id")
+  relationship CompatibilityType
+  notes        String?
+
+  plant      Plant @relation("PlantCompat_plant", fields: [plantId], references: [id], onDelete: Cascade)
+  otherPlant Plant @relation("PlantCompat_other", fields: [otherPlantId], references: [id], onDelete: Cascade)
+
+  @@unique([plantId, otherPlantId])
+  @@map("plant_compatibility")
+}
+
+model PlantingSlot {
+  id        String    @id @default(uuid())
+  bedId     String    @map("bed_id")
+  row       Int
+  col       Int
+  plantId   String?   @map("plant_id")
+  plantedAt DateTime? @map("planted_at")
+  notes     String?
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  bed   Bed    @relation(fields: [bedId], references: [id], onDelete: Cascade)
+  plant Plant? @relation(fields: [plantId], references: [id], onDelete: SetNull)
+
+  @@unique([bedId, row, col])
+  @@map("planting_slots")
+}
+
+enum SunRequirement {
+  full_sun
+  part_shade
+  full_shade
+
+  @@map("sun_requirement")
+}
+
+enum WaterNeed {
+  low
+  medium
+  high
+
+  @@map("water_need")
+}
+
+enum CompatibilityType {
+  companion
+  antagonist
+
+  @@map("compatibility_type")
+}
