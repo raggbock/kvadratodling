@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import { SignInButton, Show } from '@clerk/nextjs';
 
 export default function Home() {
   return (
@@ -13,26 +12,17 @@ export default function Home() {
         Built for hobby gardeners with small plots.
       </p>
       <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-        <Show when="signed-out">
-          <SignInButton mode="modal">
-            <button className="rounded-lg bg-green-600 px-6 py-3 text-base font-semibold text-white shadow-sm hover:bg-green-700">
-              Get started — it&apos;s free
-            </button>
-          </SignInButton>
-        </Show>
-        <Show when="signed-in">
-          <Link
-            href="/gardens"
-            className="rounded-lg bg-green-600 px-6 py-3 text-base font-semibold text-white shadow-sm hover:bg-green-700"
-          >
-            My gardens →
-          </Link>
-        </Show>
         <Link
           href="/catalog"
-          className="rounded-lg border border-gray-300 bg-white px-6 py-3 text-base font-semibold text-gray-700 shadow-sm hover:bg-gray-50"
+          className="rounded-lg bg-green-600 px-6 py-3 text-base font-semibold text-white shadow-sm hover:bg-green-700"
         >
           Browse plant catalog
+        </Link>
+        <Link
+          href="/gardens"
+          className="rounded-lg border border-gray-300 bg-white px-6 py-3 text-base font-semibold text-gray-700 shadow-sm hover:bg-gray-50"
+        >
+          My gardens →
         </Link>
       </div>
       <div className="mt-16 grid gap-6 text-left sm:grid-cols-3">
