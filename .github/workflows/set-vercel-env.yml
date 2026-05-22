@@ -7,50 +7,69 @@ jobs:
   set-env:
     runs-on: ubuntu-latest
     steps:
-      - name: Set NEXT_PUBLIC_SUPABASE_URL
+      - name: Get existing env var IDs
+        id: get-ids
         run: |
-          curl -s -X POST "https://api.vercel.com/v10/projects/$VERCEL_PROJECT_ID/env?teamId=$VERCEL_ORG_ID" \
-            -H "Authorization: Bearer ${{ secrets.VERCEL_TOKEN }}" \
-            -H "Content-Type: application/json" \
-            -d '{
-              "key": "NEXT_PUBLIC_SUPABASE_URL",
-              "value": "https://jyxbcrvyiiqdpuzoxoki.supabase.co",
-              "type": "plain",
-              "target": ["production", "preview", "development"]
-            }'
+          ENVS=$(curl -s "https://api.vercel.com/v9/projects/$VERCEL_PROJECT_ID/env?teamId=$VERCEL_ORG_ID" \
+            -H "Authorization: Bearer ${{ secrets.VERCEL_TOKEN }}")
+          URL_ID=$(echo "$ENVS" | jq -r '.envs[] | select(.key == "NEXT_PUBLIC_SUPABASE_URL") | .id')
+          ANON_ID=$(echo "$ENVS" | jq -r '.envs[] | select(.key == "NEXT_PUBLIC_SUPABASE_ANON_KEY") | .id')
+          echo "url_id=$URL_ID" >> $GITHUB_OUTPUT
+          echo "anon_id=$ANON_ID" >> $GITHUB_OUTPUT
+          echo "URL env ID: $URL_ID"
+          echo "ANON env ID: $ANON_ID"
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
-      - name: Set NEXT_PUBLIC_SUPABASE_ANON_KEY
+      - name: Update NEXT_PUBLIC_SUPABASE_URL
         run: |
-          curl -s -X POST "https://api.vercel.com/v10/projects/$VERCEL_PROJECT_ID/env?teamId=$VERCEL_ORG_ID" \
-            -H "Authorization: Bearer ${{ secrets.VERCEL_TOKEN }}" \
-            -H "Content-Type: application/json" \
-            -d '{
-              "key": "NEXT_PUBLIC_SUPABASE_ANON_KEY",
-              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5eGJjcnZ5aWlxZHB1em94b2tpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0MTkwNjgsImV4cCI6MjA5NDk5NTA2OH0.tEl4jBoXCuQeGDGE-pfZzZx9Ojgx4VOsmk0NoBTMgLI",
-              "type": "plain",
-              "target": ["production", "preview", "development"]
-            }'
+          if [ -n "${{ steps.get-ids.outputs.url_id }}" ]; then
+            curl -s -X PATCH "https://api.vercel.com/v9/projects/$VERCEL_PROJECT_ID/env/${{ steps.get-ids.outputs.url_id }}?teamId=$VERCEL_ORG_ID" \
+              -H "Authorization: Bearer ${{ secrets.VERCEL_TOKEN }}" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "value": "https://jyxbcrvyiiqdpuzoxoki.supabase.co",
+                "type": "plain",
+                "target": ["production", "preview", "development"]
+              }'
+          else
+            curl -s -X POST "https://api.vercel.com/v10/projects/$VERCEL_PROJECT_ID/env?teamId=$VERCEL_ORG_ID" \
+              -H "Authorization: Bearer ${{ secrets.VERCEL_TOKEN }}" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "key": "NEXT_PUBLIC_SUPABASE_URL",
+                "value": "https://jyxbcrvyiiqdpuzoxoki.supabase.co",
+                "type": "plain",
+                "target": ["production", "preview", "development"]
+              }'
+          fi
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
-      - name: Trigger redeploy
+      - name: Update NEXT_PUBLIC_SUPABASE_ANON_KEY
         run: |
-          curl -s -X POST "https://api.vercel.com/v13/deployments?teamId=$VERCEL_ORG_ID&forceNew=1" \
-            -H "Authorization: Bearer ${{ secrets.VERCEL_TOKEN }}" \
-            -H "Content-Type: application/json" \
-            -d '{
-              "name": "kvadratodling",
-              "target": "production",
-              "gitSource": {
-                "type": "github",
-                "ref": "master",
-                "repoId": "${{ secrets.VERCEL_PROJECT_ID }}"
-              }
-            }' | head -c 200
+          if [ -n "${{ steps.get-ids.outputs.anon_id }}" ]; then
+            curl -s -X PATCH "https://api.vercel.com/v9/projects/$VERCEL_PROJECT_ID/env/${{ steps.get-ids.outputs.anon_id }}?teamId=$VERCEL_ORG_ID" \
+              -H "Authorization: Bearer ${{ secrets.VERCEL_TOKEN }}" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5eGJjcnZ5aWlxZHB1em94b2tpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0MTkwNjgsImV4cCI6MjA5NDk5NTA2OH0.tEl4jBoXCuQeGDGE-pfZzZx9Ojgx4VOsmk0NoBTMgLI",
+                "type": "plain",
+                "target": ["production", "preview", "development"]
+              }'
+          else
+            curl -s -X POST "https://api.vercel.com/v10/projects/$VERCEL_PROJECT_ID/env?teamId=$VERCEL_ORG_ID" \
+              -H "Authorization: Bearer ${{ secrets.VERCEL_TOKEN }}" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "key": "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+                "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5eGJjcnZ5aWlxZHB1em94b2tpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0MTkwNjgsImV4cCI6MjA5NDk5NTA2OH0.tEl4jBoXCuQeGDGE-pfZzZx9Ojgx4VOsmk0NoBTMgLI",
+                "type": "plain",
+                "target": ["production", "preview", "development"]
+              }'
+          fi
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
