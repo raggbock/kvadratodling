@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireUser } from '@/lib/auth';
 import { createClient } from '@/utils/supabase/server';
+import type { TablesUpdate } from '@/utils/supabase/database.types';
 import { z } from 'zod';
 
 const UpdateGardenSchema = z.object({
@@ -42,7 +43,7 @@ export async function PATCH(
     const { gardenId } = await params;
     const body = UpdateGardenSchema.parse(await req.json());
 
-    const updates: Record<string, unknown> = { updated_at: new Date().toISOString() };
+    const updates: TablesUpdate<'gardens'> = { updated_at: new Date().toISOString() };
     if (body.name !== undefined) updates.name = body.name;
     if (body.description !== undefined) updates.description = body.description;
     if (body.location !== undefined) updates.location = body.location;

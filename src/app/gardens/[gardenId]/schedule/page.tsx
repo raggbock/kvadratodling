@@ -78,19 +78,8 @@ export default async function SchedulePage({ params, searchParams }: PageProps) 
       frostDateIso = defaultFrostDate();
     }
 
-    type DbPlant = {
-      id: string;
-      common_name: string;
-      emoji: string;
-      sow_indoors_days_before_frost: number | null;
-      direct_sow_days_before_frost: number | null;
-      transplant_days_after_frost: number | null;
-      days_to_maturity_min: number | null;
-      days_to_maturity_max: number | null;
-    };
-
     const seen = new Set<string>();
-    plantsForSchedule = (garden.beds as unknown as { planting_slots: { plant: DbPlant | null }[] }[])
+    plantsForSchedule = garden.beds
       .flatMap((b) => b.planting_slots)
       .filter((s) => s.plant !== null)
       .map((s) => s.plant!)
