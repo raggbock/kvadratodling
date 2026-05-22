@@ -2,20 +2,9 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
 
-const errorMessages: Record<string, string> = {
-  auth_failed: 'The sign-in link expired or was already used. Request a new one below.',
-  wrong_browser:
-    'Please open the link in the same browser where you requested it, then try again.',
-  no_code: 'The sign-in link was invalid. Request a new one below.',
-};
-
-export default function LoginPage() {
-  const searchParams = useSearchParams();
-  const urlError = searchParams.get('error');
-
+export default function SignUpPage() {
   const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -46,24 +35,20 @@ export default function LoginPage() {
           <p className="text-lg font-semibold text-gray-900">Check your email</p>
           <p className="mt-2 text-sm text-gray-500">
             We sent a magic link to <span className="font-medium">{email}</span>.
-            Open it in this browser.
+            Click it to activate your account.
           </p>
         </div>
       </div>
     );
   }
 
-  const bannerMessage = urlError ? (errorMessages[urlError] ?? errorMessages.auth_failed) : null;
-
   return (
     <div className="flex min-h-[60vh] items-center justify-center px-4">
       <div className="w-full max-w-sm">
-        <h1 className="mb-6 text-center text-2xl font-bold text-gray-900">Sign in</h1>
-        {bannerMessage && (
-          <div className="mb-4 rounded-md bg-amber-50 px-4 py-3 text-sm text-amber-800">
-            {bannerMessage}
-          </div>
-        )}
+        <h1 className="mb-2 text-center text-2xl font-bold text-gray-900">Create account</h1>
+        <p className="mb-6 text-center text-sm text-gray-500">
+          Enter your email and we&apos;ll send you a magic link to get started.
+        </p>
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="email"
@@ -84,9 +69,9 @@ export default function LoginPage() {
           </button>
         </form>
         <p className="mt-6 text-center text-sm text-gray-500">
-          New here?{' '}
-          <Link href="/auth/signup" className="font-medium text-green-700 hover:underline">
-            Create an account
+          Already have an account?{' '}
+          <Link href="/auth/login" className="font-medium text-green-700 hover:underline">
+            Sign in
           </Link>
         </p>
       </div>

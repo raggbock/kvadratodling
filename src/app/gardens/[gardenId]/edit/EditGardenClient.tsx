@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { SWEDISH_ZONES, lastFrostDateForYear } from '@/lib/zones';
 import { SwedenZoneMap } from '@/components/SwedenZoneMap';
 import { computeOptimalBeds } from '@/lib/bedLayout';
@@ -13,15 +14,31 @@ function frostDateLabel(md: string): string {
   return `${d} ${MONTH_SV[m - 1]}`;
 }
 
-export default function NewGardenPage() {
+interface Garden {
+  id: string;
+  name: string;
+  description: string | null;
+  location: string | null;
+  lastFrostDate: Date | string | null;
+  widthCm: number | null;
+  lengthCm: number | null;
+}
+
+export function EditGardenClient({ garden }: { garden: Garden }) {
   const router = useRouter();
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [location, setLocation] = useState('');
+  const gardenId = garden.id;
+
+  const initialFrost = garden.lastFrostDate
+    ? new Date(garden.lastFrostDate).toISOString().slice(0, 10)
+    : '';
+
+  const [name, setName] = useState(garden.name);
+  const [description, setDescription] = useState(garden.description ?? '');
+  const [location, setLocation] = useState(garden.location ?? '');
   const [zoneId, setZoneId] = useState('');
-  const [lastFrostDate, setLastFrostDate] = useState('');
-  const [widthM, setWidthM] = useState('');
-  const [lengthM, setLengthM] = useState('');
+  const [lastFrostDate, setLastFrostDate] = useState(initialFrost);
+  const [widthM, setWidthM] = useState(garden.widthCm ? String(garden.widthCm / 100) : '');
+  const [lengthM, setLengthM] = useState(garden.lengthCm ? String(garden.lengthCm / 100) : '');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -49,21 +66,21 @@ export default function NewGardenPage() {
     try {
       const w = parseFloat(widthM);
       const l = parseFloat(lengthM);
-      const res = await fetch('/api/gardens', {
-        method: 'POST',
+      const res = await fetch(`/api/gardens/${gardenId}`, {
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name,
-          description: description || undefined,
-          location: location || undefined,
-          lastFrostDate: lastFrostDate || undefined,
-          widthCm: w > 0 ? Math.round(w * 100) : undefined,
-          lengthCm: l > 0 ? Math.round(l * 100) : undefined,
+          description: description || null,
+          location: location || null,
+          lastFrostDate: lastFrostDate || null,
+          widthCm: w > 0 ? Math.round(w * 100) : null,
+          lengthCm: l > 0 ? Math.round(l * 100) : null,
         }),
       });
-      if (!res.ok) throw new Error('Failed to create garden');
-      const garden = await res.json();
-      router.push(`/gardens/${garden.id}`);
+      if (!res.ok) throw new Error('Failed to update garden');
+      router.push(`/gardens/${gardenId}`);
+      router.refresh();
     } catch {
       setError('Something went wrong. Please try again.');
       setLoading(false);
@@ -74,7 +91,13 @@ export default function NewGardenPage() {
 
   return (
     <div className="mx-auto max-w-lg px-4 py-10 sm:px-6">
-      <h1 className="mb-6 text-2xl font-bold text-gray-900">New garden</h1>
+      <div className="mb-2 text-sm text-gray-500">
+        <Link href={`/gardens/${gardenId}`} className="hover:text-green-700">
+          {garden.name}
+        </Link>{' '}
+        /
+      </div>
+      <h1 className="mb-6 text-2xl font-bold text-gray-900">Edit garden</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="mb-1 block text-sm font-medium text-gray-700">
@@ -84,7 +107,6 @@ export default function NewGardenPage() {
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="e.g. Backyard garden"
             required
             className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
           />
@@ -96,7 +118,6 @@ export default function NewGardenPage() {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={3}
-            placeholder="Optional description"
             className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
           />
         </div>
@@ -129,9 +150,6 @@ export default function NewGardenPage() {
               className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
             />
           </div>
-          <p className="mt-1 text-xs text-gray-400">
-            Enter your total plot area. Beds are auto-calculated when you land on the garden page.
-          </p>
 
           {layout && layout.beds.length > 0 && (
             <div className="mt-3 rounded-lg border border-green-200 bg-green-50 p-3">
@@ -142,16 +160,7 @@ export default function NewGardenPage() {
                 Varje låda: {layout.bedCols * 30} × {layout.bedRows * 30} cm
                 ({layout.bedCols * layout.bedRows} rutor à 30×30 cm)
               </p>
-              <p className="mt-0.5 text-xs text-green-600">
-                Totalt: {layout.beds.reduce((s, b) => s + b.rows * b.cols, 0)} odlingsrutor
-              </p>
             </div>
-          )}
-
-          {layout && layout.beds.length === 0 && widthM && lengthM && (
-            <p className="mt-2 text-xs text-amber-600">
-              Ytan är för liten för en standardlåda (min 120 × 30 cm). Försök med större mått.
-            </p>
           )}
         </div>
 
@@ -176,12 +185,11 @@ export default function NewGardenPage() {
                   <div className="space-y-0.5 text-xs text-gray-400">
                     <p>Sista frost: ~{frostDateLabel(selectedZone.lastFrostMD)}</p>
                     <p>Frostfria dagar: ~{selectedZone.frostFreeDays}</p>
-                    <p className="text-gray-300">{selectedZone.cities.slice(0, 3).join(', ')}</p>
                   </div>
                 </div>
               ) : (
                 <p className="text-sm italic text-gray-400">
-                  Click your region on the map, or use the dropdown below.
+                  Click your region to update frost date.
                 </p>
               )}
             </div>
@@ -209,7 +217,6 @@ export default function NewGardenPage() {
             type="text"
             value={location}
             onChange={(e) => setLocation(e.target.value)}
-            placeholder="e.g. Stockholm, Sweden"
             className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
           />
         </div>
@@ -224,9 +231,6 @@ export default function NewGardenPage() {
             onChange={(e) => setLastFrostDate(e.target.value)}
             className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
           />
-          <p className="mt-1 text-xs text-gray-400">
-            Auto-filled when you pick a growing zone. You can override it.
-          </p>
         </div>
 
         {error && <p className="text-sm text-red-600">{error}</p>}
@@ -237,15 +241,14 @@ export default function NewGardenPage() {
             disabled={loading || !name.trim()}
             className="flex-1 rounded-md bg-green-600 py-2 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-50"
           >
-            {loading ? 'Creating…' : 'Create garden'}
+            {loading ? 'Saving…' : 'Save changes'}
           </button>
-          <button
-            type="button"
-            onClick={() => router.back()}
+          <Link
+            href={`/gardens/${gardenId}`}
             className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
           >
             Cancel
-          </button>
+          </Link>
         </div>
       </form>
     </div>

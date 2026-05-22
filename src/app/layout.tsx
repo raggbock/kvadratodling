@@ -69,12 +69,20 @@ export default async function RootLayout({
                     <SignOutButton />
                   </>
                 ) : (
-                  <Link
-                    href="/auth/login"
-                    className="rounded-md bg-brand-default px-3 py-1.5 text-sm font-medium text-text-inverse hover:bg-brand-emphasis"
-                  >
-                    Sign in
-                  </Link>
+                  <>
+                    <Link
+                      href="/auth/login"
+                      className="rounded-md border border-brand-default px-3 py-1.5 text-sm font-medium text-brand-default hover:bg-brand-subtle"
+                    >
+                      Sign in
+                    </Link>
+                    <Link
+                      href="/auth/signup"
+                      className="rounded-md bg-brand-default px-3 py-1.5 text-sm font-medium text-text-inverse hover:bg-brand-emphasis"
+                    >
+                      Sign up
+                    </Link>
+                  </>
                 )}
               </div>
             </div>

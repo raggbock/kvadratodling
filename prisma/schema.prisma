@@ -27,6 +27,8 @@ model Garden {
   description   String?
   location      String?
   lastFrostDate DateTime? @map("last_frost_date") @db.Date
+  widthCm       Int?      @map("width_cm")
+  lengthCm      Int?      @map("length_cm")
   createdAt     DateTime  @default(now()) @map("created_at")
   updatedAt     DateTime  @updatedAt @map("updated_at")
 

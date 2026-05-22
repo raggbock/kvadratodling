@@ -1,9 +1,9 @@
 import { notFound, redirect } from 'next/navigation';
 import { createClient } from '@/utils/supabase/server';
 import { prisma } from '@/lib/prisma';
-import { GardenDetailClient } from './GardenDetailClient';
+import { EditGardenClient } from './EditGardenClient';
 
-export default async function GardenPage({
+export default async function EditGardenPage({
   params,
 }: {
   params: Promise<{ gardenId: string }>;
@@ -18,16 +18,8 @@ export default async function GardenPage({
 
   const garden = await prisma.garden.findFirst({
     where: { id: gardenId, userId: dbUser.id },
-    include: {
-      beds: {
-        orderBy: { createdAt: 'asc' },
-        include: {
-          plantingSlots: { select: { id: true } },
-        },
-      },
-    },
   });
   if (!garden) notFound();
 
-  return <GardenDetailClient garden={garden} />;
+  return <EditGardenClient garden={garden} />;
 }
