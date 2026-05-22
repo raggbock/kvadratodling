@@ -30,7 +30,7 @@ jobs:
               -H "Content-Type: application/json" \
               -d '{
                 "value": "https://jyxbcrvyiiqdpuzoxoki.supabase.co",
-                "target": ["production", "preview", "development"]
+                "target": ["production", "preview"]
               }'
           else
             curl -s -X POST "https://api.vercel.com/v10/projects/$VERCEL_PROJECT_ID/env?teamId=$VERCEL_ORG_ID" \
@@ -55,7 +55,7 @@ jobs:
               -H "Content-Type: application/json" \
               -d '{
                 "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5eGJjcnZ5aWlxZHB1em94b2tpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0MTkwNjgsImV4cCI6MjA5NDk5NTA2OH0.tEl4jBoXCuQeGDGE-pfZzZx9Ojgx4VOsmk0NoBTMgLI",
-                "target": ["production", "preview", "development"]
+                "target": ["production", "preview"]
               }'
           else
             curl -s -X POST "https://api.vercel.com/v10/projects/$VERCEL_PROJECT_ID/env?teamId=$VERCEL_ORG_ID" \
