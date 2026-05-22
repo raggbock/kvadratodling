@@ -23,7 +23,7 @@ export default async function BedPage({
 
   if (!bed) notFound();
 
-  const garden = bed.garden as { name: string } | null;
+  const garden = bed.garden as unknown as { name: string } | null;
   if (!garden) notFound();
 
   const { data: dbPlants } = await supabase
@@ -37,7 +37,7 @@ export default async function BedPage({
     return { slug: p.slug, name: p.common_name, emoji: catalogMatch?.emoji ?? '🌱' };
   });
 
-  const slots = bed.planting_slots as { row: number; col: number; plant: { slug: string; common_name: string } | null }[];
+  const slots = bed.planting_slots as unknown as { row: number; col: number; plant: { slug: string; common_name: string } | null }[];
   const initialSlots = slots.map((s) => {
     const catalogPlant = s.plant ? getPlant(s.plant.slug) : null;
     const paletteMatch = s.plant ? palette.find((p) => p.slug === s.plant!.slug) : null;

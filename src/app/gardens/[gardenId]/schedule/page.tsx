@@ -90,7 +90,7 @@ export default async function SchedulePage({ params, searchParams }: PageProps) 
     };
 
     const seen = new Set<string>();
-    plantsForSchedule = (garden.beds as { planting_slots: { plant: DbPlant | null }[] }[])
+    plantsForSchedule = (garden.beds as unknown as { planting_slots: { plant: DbPlant | null }[] }[])
       .flatMap((b) => b.planting_slots)
       .filter((s) => s.plant !== null)
       .map((s) => s.plant!)
