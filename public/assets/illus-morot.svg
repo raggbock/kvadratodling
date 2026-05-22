@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48" role="img" aria-label="Morot">
+  
+  <path d="M19 18 C 19 18, 17 26, 17 32 C 17 37, 21 41, 24 41 C 27 41, 31 37, 31 32 C 31 26, 29 18, 29 18 Z" fill="#B8654A"></path>
+  
+  <path d="M27 22 C 28 27, 28 33, 26 38" stroke="#D9A88E" stroke-width="1" stroke-linecap="round" fill="none" opacity="0.75"></path>
+  
+  <path d="M20 24 C 22 24.6, 26 24.6, 28 24" stroke="#8E4632" stroke-width="0.6" stroke-linecap="round" fill="none" opacity="0.55"></path>
+  <path d="M19.5 29 C 22 29.6, 26 29.6, 28.5 29" stroke="#8E4632" stroke-width="0.6" stroke-linecap="round" fill="none" opacity="0.55"></path>
+  <path d="M19.5 34 C 21.5 34.6, 26 34.6, 28.5 34" stroke="#8E4632" stroke-width="0.6" stroke-linecap="round" fill="none" opacity="0.5"></path>
+  
+  <path d="M22.5 40.5 L 23.8 43.5 M 25.5 40.5 L 24.2 43.5" stroke="#8E4632" stroke-width="1" stroke-linecap="round"></path>
+  
+  <path d="M20 18 C 17 14, 14 11, 13 8 C 16 9, 18 12, 20 16 Z" fill="#6B8E5A"></path>
+  <path d="M22 17 C 20 12, 19 8, 19 5 C 21 7, 22 11, 23 15 Z" fill="#4F6E40"></path>
+  <path d="M24 17 C 24 12, 24 7, 24 4 C 25 8, 25 12, 25 16 Z" fill="#6B8E5A"></path>
+  <path d="M26 17 C 27 12, 28 8, 28 5 C 28 8, 27 13, 26 16 Z" fill="#4F6E40"></path>
+  <path d="M28 18 C 30 14, 33 11, 35 8 C 33 11, 31 14, 29 17 Z" fill="#6B8E5A"></path>
+  
+  <path d="M16 11 L 19 16 M 21 9 L 22 15 M 24 7 L 24 15 M 27 9 L 26 15 M 32 11 L 28 16" stroke="#3D4F36" stroke-width="0.5" stroke-linecap="round" opacity="0.5"></path>
+</svg>

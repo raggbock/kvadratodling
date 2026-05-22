@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Kvadratodling — Pinnen">
+  
+  
+  <path d="M6 50 L58 50" stroke="#6E4A33" stroke-width="1.6" stroke-linecap="round"></path>
+  <path d="M10 53 L54 53" stroke="#6E4A33" stroke-width="1.2" stroke-linecap="round" opacity="0.45"></path>
+  <path d="M14 56 L50 56" stroke="#6E4A33" stroke-width="1" stroke-linecap="round" opacity="0.3"></path>
+
+  
+  <path d="M22 10 L42 10 L42 46 L37 53 L27 53 L22 46 Z" fill="#D9A88E" stroke="#8E4632" stroke-width="2" stroke-linejoin="round"></path>
+  
+  <path d="M28 14 L28 44" stroke="#8E4632" stroke-width="0.6" opacity="0.35"></path>
+  <path d="M36 16 L36 42" stroke="#8E4632" stroke-width="0.6" opacity="0.35"></path>
+  
+  <circle cx="32" cy="15.5" r="1.6" fill="#8E4632"></circle>
+
+  
+  <g stroke="#3D4F36" stroke-width="2.2" stroke-linecap="round" fill="none">
+    <path d="M27 22 L27 40"></path>
+    <path d="M27 31 L37 22"></path>
+    <path d="M27 31 L37 40"></path>
+  </g>
+
+  
+  <path d="M48 50 L48 42" stroke="#4F6E40" stroke-width="1.6" stroke-linecap="round" fill="none"></path>
+  <path d="M48 43 C 44 42, 42 39, 43 37 C 46 37, 48 39, 48 41 Z" fill="#6B8E5A"></path>
+  <path d="M48 43 C 52 42, 54 39, 53 37 C 50 37, 48 39, 48 41 Z" fill="#4F6E40"></path>
+</svg>

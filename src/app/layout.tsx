@@ -1,19 +1,14 @@
 import type { Metadata } from 'next';
-import { DM_Serif_Display, DM_Sans } from 'next/font/google';
+import { Familjen_Grotesk } from 'next/font/google';
+import Image from 'next/image';
 import Link from 'next/link';
 import { PostHogProvider } from '@/components/PostHogProvider';
 import { SignOutButton } from '@/components/SignOutButton';
 import './globals.css';
 
-const dmSerifDisplay = DM_Serif_Display({
-  weight: '400',
+const familjenGrotesk = Familjen_Grotesk({
   subsets: ['latin'],
-  variable: '--font-dm-serif-display',
-});
-
-const dmSans = DM_Sans({
-  subsets: ['latin'],
-  variable: '--font-dm-sans',
+  variable: '--font-familjen-grotesk',
 });
 
 export const metadata: Metadata = {
@@ -43,14 +38,14 @@ export default async function RootLayout({
   const user = await getUser();
 
   return (
-    <html lang="sv" className={`${dmSerifDisplay.variable} ${dmSans.variable} h-full antialiased`}>
+    <html lang="sv" className={`${familjenGrotesk.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col bg-surface-page text-text-default">
         <PostHogProvider>
           <header className="border-b border-border-default bg-surface-default">
             <div className="mx-auto flex max-w-7xl items-center gap-6 px-4 py-3 sm:px-6 lg:px-8">
-              <Link href="/" className="flex items-center gap-2 font-semibold text-brand-default">
-                <span className="text-xl">🌱</span>
-                <span>Kvadratodling</span>
+              <Link href="/" className="flex items-center gap-2">
+                <Image src="/assets/logo-grodden-32.svg" alt="Kvadratodling" width={28} height={28} />
+                <Image src="/assets/wordmark-grodden.svg" alt="Kvadratodling" width={110} height={18} className="hidden sm:block" />
               </Link>
               <nav className="flex flex-1 items-center gap-4 text-sm text-text-subtle">
                 <Link href="/catalog" className="hover:text-brand-default">

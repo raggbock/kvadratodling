@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" role="img" aria-label="Kvadratodling 32px">
+  
+  <rect x="3" y="3" width="26" height="26" rx="3" fill="none" stroke="#B8654A" stroke-width="2"></rect>
+  <rect x="5" y="5" width="22" height="22" rx="1.5" fill="#E8DCC4"></rect>
+  <path d="M16 25 L16 17" stroke="#4F6E40" stroke-width="1.6" stroke-linecap="round" fill="none"></path>
+  <path d="M16 18 C 12 17, 10 13, 11 10 C 15 10.5, 16 13, 16 16 Z" fill="#6B8E5A"></path>
+  <path d="M16 18 C 20 17, 22 13, 21 10 C 17 10.5, 16 13, 16 16 Z" fill="#4F6E40"></path>
+</svg>

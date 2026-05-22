@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48" role="img" aria-label="Grodd">
+  
+  
+  <path d="M6 41 C 12 36, 36 36, 42 41 L 42 44 L 6 44 Z" fill="#6E4A33"></path>
+  
+  <ellipse cx="14" cy="40" rx="2" ry="0.8" fill="#3D4F36" opacity="0.35"></ellipse>
+  <ellipse cx="32" cy="40.5" rx="2.4" ry="0.9" fill="#3D4F36" opacity="0.35"></ellipse>
+  <ellipse cx="22" cy="42" rx="1.5" ry="0.6" fill="#3D4F36" opacity="0.3"></ellipse>
+  
+  <circle cx="10" cy="42" r="0.6" fill="#3D4F36" opacity="0.5"></circle>
+  <circle cx="38" cy="41" r="0.5" fill="#3D4F36" opacity="0.5"></circle>
+  
+  <path d="M24 41 C 23 35, 24 27, 24 19" stroke="#4F6E40" stroke-width="2.4" stroke-linecap="round" fill="none"></path>
+  
+  <path d="M24 22 C 18 20, 13 14, 14 8 C 20 9, 24 14, 24 20 Z" fill="#6B8E5A"></path>
+  <path d="M16 12 C 19 14, 21 17, 23 20" stroke="#4F6E40" stroke-width="0.7" stroke-linecap="round" fill="none" opacity="0.65"></path>
+  
+  <path d="M24 22 C 30 20, 35 14, 34 8 C 28 9, 24 14, 24 20 Z" fill="#4F6E40"></path>
+  <path d="M32 12 C 29 14, 27 17, 25 20" stroke="#3D4F36" stroke-width="0.7" stroke-linecap="round" fill="none" opacity="0.6"></path>
+  
+  <circle cx="24" cy="21" r="1" fill="#3D4F36"></circle>
+</svg>
