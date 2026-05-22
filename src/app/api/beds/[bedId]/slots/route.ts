@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireUser } from '@/lib/auth';
-import { prisma } from '@/lib/prisma';
+import { createClient } from '@/utils/supabase/server';
 import { z } from 'zod';
 
 const UpsertSlotSchema = z.object({
@@ -14,30 +14,33 @@ export async function PUT(
   { params }: { params: Promise<{ bedId: string }> }
 ) {
   try {
-    const user = await requireUser();
+    await requireUser();
+    const supabase = await createClient();
     const { bedId } = await params;
 
-    const bed = await prisma.bed.findFirst({
-      where: { id: bedId, garden: { userId: user.id } },
-    });
+    // RLS ensures user owns the bed (via garden ownership)
+    const { data: bed } = await supabase.from('beds').select('id').eq('id', bedId).single();
     if (!bed) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
     const { row, col, plantSlug } = UpsertSlotSchema.parse(await req.json());
 
     if (plantSlug === null) {
-      await prisma.plantingSlot.deleteMany({ where: { bedId, row, col } });
+      await supabase.from('planting_slots').delete().match({ bed_id: bedId, row, col });
       return NextResponse.json({ deleted: true });
     }
 
-    const plant = await prisma.plant.findUnique({ where: { slug: plantSlug } });
+    const { data: plant } = await supabase.from('plants').select('id').eq('slug', plantSlug).single();
     if (!plant) return NextResponse.json({ error: 'Unknown plant' }, { status: 400 });
 
-    const slot = await prisma.plantingSlot.upsert({
-      where: { bedId_row_col: { bedId, row, col } },
-      create: { bedId, row, col, plantId: plant.id },
-      update: { plantId: plant.id },
-      include: { plant: true },
-    });
+    const { data: slot, error } = await supabase
+      .from('planting_slots')
+      .upsert(
+        { bed_id: bedId, row, col, plant_id: plant.id, updated_at: new Date().toISOString() },
+        { onConflict: 'bed_id,row,col' }
+      )
+      .select('*, plant:plants(*)')
+      .single();
+    if (error) throw error;
     return NextResponse.json(slot);
   } catch (err) {
     if (err instanceof z.ZodError) return NextResponse.json({ error: err.flatten() }, { status: 400 });

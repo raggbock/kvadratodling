@@ -1,10 +1,9 @@
 import { notFound } from "next/navigation";
-import { prisma } from "@/lib/prisma";
+import { createClient } from "@/utils/supabase/server";
 import { computeSchedule, PlantScheduleInput } from "@/lib/plantSchedule";
 import { ScheduleView } from "@/components/ScheduleView";
 import { CATALOG_PLANTS } from "@/data/plants";
 
-// Default last-frost date for Swedish zone 3 (Stockholm area): May 1
 function defaultFrostDate(): string {
   return `${new Date().getFullYear()}-05-01`;
 }
@@ -35,8 +34,7 @@ export default async function SchedulePage({ params, searchParams }: PageProps) 
 
   if (gardenId === "demo") {
     frostDateIso = parseFrostDate(frostDateParam);
-    // Use static catalog data so the demo works without a seeded DB
-    plantsForSchedule = CATALOG_PLANTS.map((p, i) => ({
+    plantsForSchedule = CATALOG_PLANTS.map((p) => ({
       id: p.slug,
       commonName: p.commonName,
       emoji: p.emoji,
@@ -47,53 +45,53 @@ export default async function SchedulePage({ params, searchParams }: PageProps) 
       daysToMaturityMax: p.daysToMaturityMax,
     }));
   } else {
-    const garden = await prisma.garden.findUnique({
-      where: { id: gardenId },
-      select: {
-        id: true,
-        name: true,
-        lastFrostDate: true,
-        beds: {
-          select: {
-            plantingSlots: {
-              where: { plantId: { not: null } },
-              select: {
-                plant: {
-                  select: {
-                    id: true,
-                    commonName: true,
-                    emoji: true,
-                    sowIndoorsDaysBeforeFrost: true,
-                    directSowDaysBeforeFrost: true,
-                    transplantDaysAfterFrost: true,
-                    daysToMaturityMin: true,
-                    daysToMaturityMax: true,
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    });
+    const supabase = await createClient();
+    const { data: garden } = await supabase
+      .from("gardens")
+      .select(`
+        id, name, last_frost_date,
+        beds(
+          planting_slots(
+            plant:plants(
+              id, common_name, emoji,
+              sow_indoors_days_before_frost,
+              direct_sow_days_before_frost,
+              transplant_days_after_frost,
+              days_to_maturity_min,
+              days_to_maturity_max
+            )
+          )
+        )
+      `)
+      .eq("id", gardenId)
+      .single();
 
     if (!garden) notFound();
 
     gardenName = garden.name;
 
-    // Use garden's stored frost date unless user has overridden via URL
     if (frostDateParam) {
       frostDateIso = parseFrostDate(frostDateParam);
-    } else if (garden.lastFrostDate) {
-      frostDateIso = toIso(garden.lastFrostDate);
+    } else if (garden.last_frost_date) {
+      frostDateIso = toIso(new Date(garden.last_frost_date));
     } else {
       frostDateIso = defaultFrostDate();
     }
 
-    // Deduplicate plants (same species can appear in multiple slots)
+    type DbPlant = {
+      id: string;
+      common_name: string;
+      emoji: string;
+      sow_indoors_days_before_frost: number | null;
+      direct_sow_days_before_frost: number | null;
+      transplant_days_after_frost: number | null;
+      days_to_maturity_min: number | null;
+      days_to_maturity_max: number | null;
+    };
+
     const seen = new Set<string>();
-    plantsForSchedule = garden.beds
-      .flatMap((b) => b.plantingSlots)
+    plantsForSchedule = (garden.beds as { planting_slots: { plant: DbPlant | null }[] }[])
+      .flatMap((b) => b.planting_slots)
       .filter((s) => s.plant !== null)
       .map((s) => s.plant!)
       .filter((p) => {
@@ -102,12 +100,14 @@ export default async function SchedulePage({ params, searchParams }: PageProps) 
         return true;
       })
       .map((p) => ({
-        ...p,
-        sowIndoorsDaysBeforeFrost: p.sowIndoorsDaysBeforeFrost ?? null,
-        directSowDaysBeforeFrost: p.directSowDaysBeforeFrost ?? null,
-        transplantDaysAfterFrost: p.transplantDaysAfterFrost ?? null,
-        daysToMaturityMin: p.daysToMaturityMin ?? null,
-        daysToMaturityMax: p.daysToMaturityMax ?? null,
+        id: p.id,
+        commonName: p.common_name,
+        emoji: p.emoji,
+        sowIndoorsDaysBeforeFrost: p.sow_indoors_days_before_frost,
+        directSowDaysBeforeFrost: p.direct_sow_days_before_frost,
+        transplantDaysAfterFrost: p.transplant_days_after_frost,
+        daysToMaturityMin: p.days_to_maturity_min,
+        daysToMaturityMax: p.days_to_maturity_max,
       }));
   }
 

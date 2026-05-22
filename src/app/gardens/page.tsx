@@ -1,7 +1,6 @@
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/utils/supabase/server';
-import { prisma } from '@/lib/prisma';
 
 export const metadata = { title: 'My Gardens — Kvadratodling' };
 
@@ -10,14 +9,10 @@ export default async function GardensPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/auth/login');
 
-  const dbUser = await prisma.user.findUnique({ where: { id: user.id } });
-  const gardens = dbUser
-    ? await prisma.garden.findMany({
-        where: { userId: dbUser.id },
-        include: { beds: { select: { id: true } } },
-        orderBy: { createdAt: 'desc' },
-      })
-    : [];
+  const { data: gardens } = await supabase
+    .from('gardens')
+    .select('id, name, description, created_at, beds(id)')
+    .order('created_at', { ascending: false });
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6 lg:px-8">
@@ -31,7 +26,7 @@ export default async function GardensPage() {
         </Link>
       </div>
 
-      {gardens.length === 0 ? (
+      {!gardens || gardens.length === 0 ? (
         <div className="rounded-xl border-2 border-dashed border-gray-300 bg-white py-16 text-center">
           <div className="mb-3 text-4xl">🪴</div>
           <h2 className="mb-1 font-semibold text-gray-700">No gardens yet</h2>

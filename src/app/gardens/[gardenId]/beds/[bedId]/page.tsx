@@ -1,7 +1,6 @@
 import { notFound, redirect } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/utils/supabase/server';
-import { prisma } from '@/lib/prisma';
 import { getPlant, PLANTS as CATALOG_PLANTS } from '@/lib/plants';
 import BedPlanner from './BedPlanner';
 
@@ -15,31 +14,31 @@ export default async function BedPage({
   if (!user) redirect('/auth/login');
 
   const { gardenId, bedId } = await params;
-  const dbUser = await prisma.user.findUnique({ where: { id: user.id } });
-  if (!dbUser) redirect('/gardens');
+  const { data: bed } = await supabase
+    .from('beds')
+    .select('id, name, rows, cols, garden:gardens(name), planting_slots(id, row, col, plant:plants(slug, common_name))')
+    .eq('id', bedId)
+    .eq('garden_id', gardenId)
+    .single();
 
-  const bed = await prisma.bed.findFirst({
-    where: { id: bedId, garden: { id: gardenId, userId: dbUser.id } },
-    include: {
-      garden: { select: { name: true } },
-      plantingSlots: { include: { plant: { select: { slug: true, commonName: true } } } },
-    },
-  });
   if (!bed) notFound();
 
-  const dbPlants = await prisma.plant.findMany({
-    select: { slug: true, commonName: true },
-    where: { isActive: true },
-    orderBy: { commonName: 'asc' },
-  });
+  const garden = bed.garden as { name: string } | null;
+  if (!garden) notFound();
 
-  // Build a palette merging DB plants with catalog emojis
-  const palette = dbPlants.map((p: { slug: string; commonName: string }) => {
+  const { data: dbPlants } = await supabase
+    .from('plants')
+    .select('slug, common_name')
+    .eq('is_active', true)
+    .order('common_name');
+
+  const palette = (dbPlants ?? []).map((p) => {
     const catalogMatch = CATALOG_PLANTS.find((c) => c.slug === p.slug);
-    return { slug: p.slug, name: p.commonName, emoji: catalogMatch?.emoji ?? '🌱' };
+    return { slug: p.slug, name: p.common_name, emoji: catalogMatch?.emoji ?? '🌱' };
   });
 
-  const initialSlots = bed.plantingSlots.map((s: { row: number; col: number; plant: { slug: string; commonName: string } | null }) => {
+  const slots = bed.planting_slots as { row: number; col: number; plant: { slug: string; common_name: string } | null }[];
+  const initialSlots = slots.map((s) => {
     const catalogPlant = s.plant ? getPlant(s.plant.slug) : null;
     const paletteMatch = s.plant ? palette.find((p) => p.slug === s.plant!.slug) : null;
     return {
@@ -47,7 +46,7 @@ export default async function BedPage({
       col: s.col,
       plantSlug: s.plant?.slug ?? null,
       plantEmoji: paletteMatch?.emoji ?? catalogPlant?.emoji ?? null,
-      plantName: s.plant?.commonName ?? null,
+      plantName: s.plant?.common_name ?? null,
     };
   });
 
@@ -59,7 +58,7 @@ export default async function BedPage({
         </Link>{' '}
         /{' '}
         <Link href={`/gardens/${gardenId}`} className="hover:text-green-700">
-          {bed.garden.name}
+          {garden.name}
         </Link>{' '}
         /
       </div>

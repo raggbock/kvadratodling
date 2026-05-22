@@ -1,6 +1,5 @@
 import { notFound, redirect } from 'next/navigation';
 import { createClient } from '@/utils/supabase/server';
-import { prisma } from '@/lib/prisma';
 import { GardenDetailClient } from './GardenDetailClient';
 
 export default async function GardenPage({
@@ -13,21 +12,29 @@ export default async function GardenPage({
   if (!user) redirect('/auth/login');
 
   const { gardenId } = await params;
-  const dbUser = await prisma.user.findUnique({ where: { id: user.id } });
-  if (!dbUser) redirect('/gardens');
+  const { data: raw } = await supabase
+    .from('gardens')
+    .select('id, name, description, location, width_cm, length_cm, beds(id, name, rows, cols, planting_slots(id))')
+    .eq('id', gardenId)
+    .single();
 
-  const garden = await prisma.garden.findFirst({
-    where: { id: gardenId, userId: dbUser.id },
-    include: {
-      beds: {
-        orderBy: { createdAt: 'asc' },
-        include: {
-          plantingSlots: { select: { id: true } },
-        },
-      },
-    },
-  });
-  if (!garden) notFound();
+  if (!raw) notFound();
+
+  const garden = {
+    id: raw.id,
+    name: raw.name,
+    description: raw.description,
+    location: raw.location,
+    widthCm: raw.width_cm,
+    lengthCm: raw.length_cm,
+    beds: (raw.beds as { id: string; name: string; rows: number; cols: number; planting_slots: { id: string }[] }[]).map((b) => ({
+      id: b.id,
+      name: b.name,
+      rows: b.rows,
+      cols: b.cols,
+      plantingSlots: b.planting_slots,
+    })),
+  };
 
   return <GardenDetailClient garden={garden} />;
 }

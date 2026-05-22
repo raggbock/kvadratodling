@@ -1,6 +1,5 @@
 import { notFound, redirect } from 'next/navigation';
 import { createClient } from '@/utils/supabase/server';
-import { prisma } from '@/lib/prisma';
 import { EditGardenClient } from './EditGardenClient';
 
 export default async function EditGardenPage({
@@ -13,13 +12,23 @@ export default async function EditGardenPage({
   if (!user) redirect('/auth/login');
 
   const { gardenId } = await params;
-  const dbUser = await prisma.user.findUnique({ where: { id: user.id } });
-  if (!dbUser) redirect('/gardens');
+  const { data: raw } = await supabase
+    .from('gardens')
+    .select('id, name, description, location, last_frost_date, width_cm, length_cm')
+    .eq('id', gardenId)
+    .single();
 
-  const garden = await prisma.garden.findFirst({
-    where: { id: gardenId, userId: dbUser.id },
-  });
-  if (!garden) notFound();
+  if (!raw) notFound();
+
+  const garden = {
+    id: raw.id,
+    name: raw.name,
+    description: raw.description,
+    location: raw.location,
+    lastFrostDate: raw.last_frost_date,
+    widthCm: raw.width_cm,
+    lengthCm: raw.length_cm,
+  };
 
   return <EditGardenClient garden={garden} />;
 }

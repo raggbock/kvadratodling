@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireUser } from '@/lib/auth';
-import { prisma } from '@/lib/prisma';
+import { createClient } from '@/utils/supabase/server';
 import { z } from 'zod';
 
 const CreateBedSchema = z.object({
@@ -15,14 +15,21 @@ export async function POST(
   { params }: { params: Promise<{ gardenId: string }> }
 ) {
   try {
-    const user = await requireUser();
+    await requireUser();
+    const supabase = await createClient();
     const { gardenId } = await params;
 
-    const garden = await prisma.garden.findFirst({ where: { id: gardenId, userId: user.id } });
+    // RLS ensures user owns the garden; returns null if not found or not owned
+    const { data: garden } = await supabase.from('gardens').select('id').eq('id', gardenId).single();
     if (!garden) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
     const body = CreateBedSchema.parse(await req.json());
-    const bed = await prisma.bed.create({ data: { gardenId, ...body } });
+    const { data: bed, error } = await supabase
+      .from('beds')
+      .insert({ garden_id: gardenId, ...body })
+      .select()
+      .single();
+    if (error) throw error;
     return NextResponse.json(bed, { status: 201 });
   } catch (err) {
     if (err instanceof z.ZodError) return NextResponse.json({ error: err.flatten() }, { status: 400 });
