@@ -30,7 +30,6 @@ jobs:
               -H "Content-Type: application/json" \
               -d '{
                 "value": "https://jyxbcrvyiiqdpuzoxoki.supabase.co",
-                "type": "plain",
                 "target": ["production", "preview", "development"]
               }'
           else
@@ -56,7 +55,6 @@ jobs:
               -H "Content-Type: application/json" \
               -d '{
                 "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5eGJjcnZ5aWlxZHB1em94b2tpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0MTkwNjgsImV4cCI6MjA5NDk5NTA2OH0.tEl4jBoXCuQeGDGE-pfZzZx9Ojgx4VOsmk0NoBTMgLI",
-                "type": "plain",
                 "target": ["production", "preview", "development"]
               }'
           else
