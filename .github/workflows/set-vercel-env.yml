@@ -48,7 +48,7 @@ jobs:
               "target": ["production", "preview", "development"]
             }')
           echo "$RESULT"
-          echo "$RESULT" | jq -e '.key' || exit 1
+          echo "$RESULT" | jq -e '.created.key // .key' || exit 1
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
@@ -65,7 +65,7 @@ jobs:
               "target": ["production", "preview", "development"]
             }')
           echo "$RESULT"
-          echo "$RESULT" | jq -e '.key' || exit 1
+          echo "$RESULT" | jq -e '.created.key // .key' || exit 1
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
