@@ -10,6 +10,7 @@ export default defineConfig({
     seed: "ts-node --esm prisma/seed.ts",
   },
   datasource: {
-    url: process.env["DATABASE_URL"],
+    // Use direct connection for schema operations (db push, migrate) — pooler doesn't support DDL
+    url: process.env["DIRECT_URL"] ?? process.env["DATABASE_URL"],
   },
 });
