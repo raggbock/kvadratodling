@@ -93,43 +93,52 @@ export default function BedPlanner({ bedId, rows, cols, initialSlots, palette }:
       <aside className="w-full flex-shrink-0 lg:w-64">
         <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
           <div className="border-b border-gray-100 px-4 py-3">
-            <h2 className="text-sm font-semibold text-gray-700">Plant palette</h2>
+            <h2 className="text-sm font-semibold text-gray-700">Växtpalett</h2>
             <button
               onClick={() => setSelectedSlug(null)}
-              className={`mt-2 w-full rounded-md border px-3 py-1.5 text-sm transition ${
-                selectedSlug === null
+              disabled={palette.length === 0}
+              className={`mt-2 w-full rounded-md border px-3 py-1.5 text-sm transition disabled:cursor-not-allowed disabled:opacity-40 ${
+                selectedSlug === null && palette.length > 0
                   ? 'border-red-400 bg-red-50 font-medium text-red-700'
                   : 'border-gray-300 text-gray-500 hover:bg-gray-50'
               }`}
             >
-              🗑 Erase mode
+              🗑 Raderingsläge
             </button>
           </div>
           <div className="p-3">
-            <input
-              type="search"
-              placeholder="Search plants…"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="mb-2 w-full rounded-md border border-gray-200 px-2 py-1.5 text-sm focus:border-green-400 focus:outline-none"
-            />
-            <ul className="max-h-[60vh] overflow-y-auto space-y-0.5">
-              {filteredPlants.map((plant) => (
-                <li key={plant.slug}>
-                  <button
-                    onClick={() => setSelectedSlug(plant.slug)}
-                    className={`flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm transition ${
-                      selectedSlug === plant.slug
-                        ? 'bg-green-100 font-medium text-green-800 ring-1 ring-green-300'
-                        : 'text-gray-700 hover:bg-gray-50'
-                    }`}
-                  >
-                    <span className="text-base">{plant.emoji}</span>
-                    <span className="flex-1">{plant.name}</span>
-                  </button>
-                </li>
-              ))}
-            </ul>
+            {palette.length === 0 ? (
+              <p className="px-1 py-4 text-center text-xs text-gray-500">
+                Inga växter i katalogen än.
+              </p>
+            ) : (
+              <>
+                <input
+                  type="search"
+                  placeholder="Sök växter…"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="mb-2 w-full rounded-md border border-gray-200 px-2 py-1.5 text-sm focus:border-green-400 focus:outline-none"
+                />
+                <ul className="max-h-[60vh] overflow-y-auto space-y-0.5">
+                  {filteredPlants.map((plant) => (
+                    <li key={plant.slug}>
+                      <button
+                        onClick={() => setSelectedSlug(plant.slug)}
+                        className={`flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm transition ${
+                          selectedSlug === plant.slug
+                            ? 'bg-green-100 font-medium text-green-800 ring-1 ring-green-300'
+                            : 'text-gray-700 hover:bg-gray-50'
+                        }`}
+                      >
+                        <span className="text-base">{plant.emoji}</span>
+                        <span className="flex-1">{plant.name}</span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
           </div>
         </div>
       </aside>
@@ -141,15 +150,17 @@ export default function BedPlanner({ bedId, rows, cols, initialSlots, palette }:
             {filledCount} / {total} squares planted
           </span>
           <span>
-            {selectedPlant ? (
+            {palette.length === 0 ? (
+              <span className="text-amber-600">Välj först en växt i katalogen</span>
+            ) : selectedPlant ? (
               <>
-                Planting{' '}
+                Planterar{' '}
                 <strong className="text-gray-700">
                   {selectedPlant.emoji} {selectedPlant.name}
                 </strong>
               </>
             ) : (
-              <strong className="text-red-600">Erasing</strong>
+              <strong className="text-red-600">Raderingsläge</strong>
             )}
           </span>
         </div>
