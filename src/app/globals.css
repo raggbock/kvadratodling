@@ -1,6 +1,9 @@
-@import "tailwindcss";
+/* Font @imports must precede `@import "tailwindcss"` — Tailwind v4 inlines its
+   import to ~1300 rules, which would otherwise push these below other rules and
+   make them invalid (@import must come first). */
 @import url("https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@400;500;600;700&display=swap");
 @import url("https://api.fontshare.com/v2/css?f[]=boska@300,400,500,600,700&display=swap");
+@import "tailwindcss";
 
 /* ============================================================
    Kvadratodling Design Tokens — designer's terracotta palette

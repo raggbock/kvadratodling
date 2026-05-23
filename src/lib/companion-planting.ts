@@ -87,13 +87,18 @@ export function getNeighborHints(plantSlug: string, neighborSlugs: string[]): Co
 
 /**
  * Returns all known companions (good or bad) for a single plant slug.
+ * Deduplicates by the other plant — a pair listed in both directions in
+ * COMPANION_RELATIONSHIPS yields a single hint (first occurrence wins).
  */
 export function getAllCompanions(plantSlug: string): CompanionHint[] {
-  return COMPANION_RELATIONSHIPS
-    .filter((r) => r.plant1 === plantSlug || r.plant2 === plantSlug)
-    .map((r) => ({
-      kind: r.kind,
-      reason: r.reason,
-      otherPlantSlug: r.plant1 === plantSlug ? r.plant2 : r.plant1,
-    }));
+  const seen = new Set<string>();
+  const hints: CompanionHint[] = [];
+  for (const r of COMPANION_RELATIONSHIPS) {
+    if (r.plant1 !== plantSlug && r.plant2 !== plantSlug) continue;
+    const otherPlantSlug = r.plant1 === plantSlug ? r.plant2 : r.plant1;
+    if (seen.has(otherPlantSlug)) continue;
+    seen.add(otherPlantSlug);
+    hints.push({ kind: r.kind, reason: r.reason, otherPlantSlug });
+  }
+  return hints;
 }
