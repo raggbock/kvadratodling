@@ -6,10 +6,10 @@ import { useSearchParams } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
 
 const errorMessages: Record<string, string> = {
-  auth_failed: 'The sign-in link expired or was already used. Request a new one below.',
+  auth_failed: 'Inloggningslänken har gått ut eller är redan använd. Begär en ny nedan.',
   wrong_browser:
-    'Please open the link in the same browser where you requested it, then try again.',
-  no_code: 'The sign-in link was invalid. Request a new one below.',
+    'Öppna länken i samma webbläsare där du begärde den, och försök igen.',
+  no_code: 'Inloggningslänken var ogiltig. Begär en ny nedan.',
 };
 
 export default function LoginForm() {
@@ -43,10 +43,10 @@ export default function LoginForm() {
       <div className="flex min-h-[60vh] items-center justify-center px-4">
         <div className="text-center">
           <div className="mb-3 text-4xl">📬</div>
-          <p className="text-lg font-semibold text-gray-900">Check your email</p>
+          <p className="text-lg font-semibold text-gray-900">Kolla din e-post</p>
           <p className="mt-2 text-sm text-gray-500">
-            We sent a magic link to <span className="font-medium">{email}</span>.
-            Open it in this browser.
+            Vi har skickat en magisk länk till <span className="font-medium">{email}</span>.
+            Öppna den i den här webbläsaren.
           </p>
         </div>
       </div>
@@ -58,7 +58,7 @@ export default function LoginForm() {
   return (
     <div className="flex min-h-[60vh] items-center justify-center px-4">
       <div className="w-full max-w-sm">
-        <h1 className="mb-6 text-center text-2xl font-bold text-gray-900">Sign in</h1>
+        <h1 className="mb-6 text-center text-2xl font-bold text-gray-900">Logga in</h1>
         {bannerMessage && (
           <div className="mb-4 rounded-md bg-amber-50 px-4 py-3 text-sm text-amber-800">
             {bannerMessage}
@@ -69,7 +69,7 @@ export default function LoginForm() {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="your@email.com"
+            placeholder="din@epost.se"
             required
             autoFocus
             className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
@@ -80,13 +80,13 @@ export default function LoginForm() {
             disabled={loading}
             className="w-full rounded-md bg-green-600 py-2 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-50"
           >
-            {loading ? 'Sending…' : 'Send magic link'}
+            {loading ? 'Skickar…' : 'Skicka magisk länk'}
           </button>
         </form>
         <p className="mt-6 text-center text-sm text-gray-500">
-          New here?{' '}
+          Ny här?{' '}
           <Link href="/auth/signup" className="font-medium text-green-700 hover:underline">
-            Create an account
+            Skapa ett konto
           </Link>
         </p>
       </div>

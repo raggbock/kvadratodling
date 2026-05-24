@@ -82,7 +82,7 @@ export function EditGardenClient({ garden }: { garden: Garden }) {
       router.push(`/gardens/${gardenId}`);
       router.refresh();
     } catch {
-      setError('Something went wrong. Please try again.');
+      setError('Något gick fel. Försök igen.');
       setLoading(false);
     }
   }
@@ -97,11 +97,11 @@ export function EditGardenClient({ garden }: { garden: Garden }) {
         </Link>{' '}
         /
       </div>
-      <h1 className="mb-6 text-2xl font-bold text-gray-900">Edit garden</h1>
+      <h1 className="mb-6 text-2xl font-bold text-gray-900">Redigera odling</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="mb-1 block text-sm font-medium text-gray-700">
-            Garden name <span className="text-red-500">*</span>
+            Namn <span className="text-red-500">*</span>
           </label>
           <input
             type="text"
@@ -113,7 +113,7 @@ export function EditGardenClient({ garden }: { garden: Garden }) {
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">Description</label>
+          <label className="mb-1 block text-sm font-medium text-gray-700">Beskrivning</label>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
@@ -125,30 +125,42 @@ export function EditGardenClient({ garden }: { garden: Garden }) {
         {/* Dimensions */}
         <div>
           <label className="mb-1 block text-sm font-medium text-gray-700">
-            Plot size (meters)
+            Storlek på din yta
           </label>
           <div className="flex items-center gap-2">
-            <input
-              type="number"
-              min="0.3"
-              max="100"
-              step="0.1"
-              value={widthM}
-              onChange={(e) => setWidthM(e.target.value)}
-              placeholder="Bredd"
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
-            />
+            <div className="relative flex-1">
+              <input
+                type="number"
+                min="0.3"
+                max="100"
+                step="0.1"
+                value={widthM}
+                onChange={(e) => setWidthM(e.target.value)}
+                placeholder="Bredd"
+                aria-label="Bredd i meter"
+                className="w-full rounded-md border border-gray-300 px-3 py-2 pr-8 text-sm shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+              />
+              <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">
+                m
+              </span>
+            </div>
             <span className="shrink-0 text-gray-400">×</span>
-            <input
-              type="number"
-              min="0.3"
-              max="100"
-              step="0.1"
-              value={lengthM}
-              onChange={(e) => setLengthM(e.target.value)}
-              placeholder="Längd"
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
-            />
+            <div className="relative flex-1">
+              <input
+                type="number"
+                min="0.3"
+                max="100"
+                step="0.1"
+                value={lengthM}
+                onChange={(e) => setLengthM(e.target.value)}
+                placeholder="Längd"
+                aria-label="Längd i meter"
+                className="w-full rounded-md border border-gray-300 px-3 py-2 pr-8 text-sm shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+              />
+              <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">
+                m
+              </span>
+            </div>
           </div>
 
           {layout && layout.beds.length > 0 && (
@@ -169,7 +181,7 @@ export function EditGardenClient({ garden }: { garden: Garden }) {
         {/* Zone picker */}
         <div>
           <p className="mb-2 block text-sm font-medium text-gray-700">
-            Growing zone — click your region on the map
+            Odlingszon — klicka din region på kartan
           </p>
           <div className="flex items-start gap-4">
             <div className="w-28 shrink-0 sm:w-36">
@@ -191,19 +203,19 @@ export function EditGardenClient({ garden }: { garden: Garden }) {
                 </div>
               ) : (
                 <p className="text-sm italic text-gray-400">
-                  Click your region to update frost date.
+                  Klicka din region för att uppdatera frostdatumet.
                 </p>
               )}
             </div>
           </div>
           <div className="mt-3">
-            <label className="sr-only">Select growing zone</label>
+            <label className="sr-only">Välj odlingszon</label>
             <select
               value={zoneId}
               onChange={(e) => handleZoneChange(e.target.value)}
               className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
             >
-              <option value="">— Select your region in Sweden —</option>
+              <option value="">— Välj din region —</option>
               {SWEDISH_ZONES.map((z) => (
                 <option key={z.id} value={z.id}>
                   {z.id}: {z.nameSv} ({z.cities.slice(0, 3).join(', ')})
@@ -214,7 +226,7 @@ export function EditGardenClient({ garden }: { garden: Garden }) {
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">Location</label>
+          <label className="mb-1 block text-sm font-medium text-gray-700">Plats</label>
           <input
             type="text"
             value={location}
@@ -225,7 +237,7 @@ export function EditGardenClient({ garden }: { garden: Garden }) {
 
         <div>
           <label className="mb-1 block text-sm font-medium text-gray-700">
-            Last frost date
+            Sista frostdag
           </label>
           <input
             type="date"
@@ -243,13 +255,13 @@ export function EditGardenClient({ garden }: { garden: Garden }) {
             disabled={loading || !name.trim()}
             className="flex-1 rounded-md bg-green-600 py-2 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-50"
           >
-            {loading ? 'Saving…' : 'Save changes'}
+            {loading ? 'Sparar…' : 'Spara'}
           </button>
           <Link
             href={`/gardens/${gardenId}`}
             className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
           >
-            Cancel
+            Avbryt
           </Link>
         </div>
       </form>

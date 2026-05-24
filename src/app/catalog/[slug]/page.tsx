@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const plant = getPlant(slug);
   if (!plant) return {};
   return {
-    title: `${plant.name} — Kvadratodling`,
+    title: `${plant.nameSv} | Kvadratodling`,
     description: plant.description,
   };
 }
@@ -39,7 +39,7 @@ export default async function PlantDetailPage({ params }: Props) {
         href="/catalog"
         className="mb-6 inline-flex items-center gap-1 text-sm text-green-600 hover:text-green-700"
       >
-        ← Back to catalog
+        ← Tillbaka till katalogen
       </Link>
 
       {/* Header */}
@@ -48,8 +48,8 @@ export default async function PlantDetailPage({ params }: Props) {
           {plant.emoji}
         </span>
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">{plant.name}</h1>
-          <p className="text-gray-400">{plant.nameSv} · {plant.family}</p>
+          <h1 className="text-3xl font-bold tracking-tight text-gray-900">{plant.nameSv}</h1>
+          <p className="text-gray-400">{plant.name} · {plant.family}</p>
         </div>
       </div>
 
@@ -57,10 +57,10 @@ export default async function PlantDetailPage({ params }: Props) {
 
       {/* Stats */}
       <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Stat label="Per square" value={`${plant.plantsPerSquare} plant${plant.plantsPerSquare !== 1 ? 's' : ''}`} />
-        <Stat label="Sun" value={`${SUN_ICONS[plant.sunRequirement]} ${SUN_LABELS[plant.sunRequirement]}`} />
-        <Stat label="Water" value={`${WATER_ICONS[plant.waterRequirement]} ${WATER_LABELS[plant.waterRequirement]}`} />
-        <Stat label="Days to harvest" value={`${plant.daysToHarvest} days`} />
+        <Stat label="Per ruta" value={`${plant.plantsPerSquare} st`} />
+        <Stat label="Sol" value={`${SUN_ICONS[plant.sunRequirement]} ${SUN_LABELS[plant.sunRequirement]}`} />
+        <Stat label="Vatten" value={`${WATER_ICONS[plant.waterRequirement]} ${WATER_LABELS[plant.waterRequirement]}`} />
+        <Stat label="Dagar till skörd" value={`${plant.daysToHarvest} dagar`} />
       </div>
 
       {/* Tips */}
@@ -86,14 +86,14 @@ export default async function PlantDetailPage({ params }: Props) {
       {/* Companion planting */}
       {companions.length > 0 && (
         <div className="mt-8">
-          <h2 className="text-xl font-semibold text-gray-900">Companion Planting</h2>
+          <h2 className="text-xl font-semibold text-gray-900">Sällskapsplantering</h2>
           <p className="mt-1 text-sm text-gray-500">
-            These hints appear in the planner when adjacent squares are detected.
+            Tipsen visas i planeraren när grannrutorna är upptagna.
           </p>
 
           {goodCompanions.length > 0 && (
             <div className="mt-4">
-              <h3 className="mb-2 text-sm font-medium text-green-700">✅ Good neighbors</h3>
+              <h3 className="mb-2 text-sm font-medium text-green-700">✅ Goda grannar</h3>
               <div className="flex flex-col gap-2">
                 {goodCompanions.map((hint) => (
                   <CompanionHint key={hint.otherPlantSlug} hint={hint} />
@@ -104,7 +104,7 @@ export default async function PlantDetailPage({ params }: Props) {
 
           {badCompanions.length > 0 && (
             <div className="mt-4">
-              <h3 className="mb-2 text-sm font-medium text-red-700">⚠️ Bad neighbors</h3>
+              <h3 className="mb-2 text-sm font-medium text-red-700">⚠️ Dåliga grannar</h3>
               <div className="flex flex-col gap-2">
                 {badCompanions.map((hint) => (
                   <CompanionHint key={hint.otherPlantSlug} hint={hint} />
@@ -117,7 +117,7 @@ export default async function PlantDetailPage({ params }: Props) {
 
       {companions.length === 0 && (
         <div className="mt-8 rounded-xl border border-dashed border-gray-200 p-6 text-center text-sm text-gray-400">
-          No companion-planting data yet for this plant.
+          Ingen sällskapsplanterings-data för den här växten ännu.
         </div>
       )}
     </div>

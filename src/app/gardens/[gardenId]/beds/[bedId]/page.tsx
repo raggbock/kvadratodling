@@ -54,7 +54,7 @@ export default async function BedPage({
     <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
       <div className="mb-2 text-sm text-gray-500">
         <Link href="/gardens" className="hover:text-green-700">
-          My gardens
+          Mina odlingar
         </Link>{' '}
         /{' '}
         <Link href={`/gardens/${gardenId}`} className="hover:text-green-700">
@@ -66,7 +66,7 @@ export default async function BedPage({
         <div>
           <h1 className="text-2xl font-bold text-gray-900">{bed.name}</h1>
           <p className="mt-1 text-sm text-gray-500">
-            {bed.cols} × {bed.rows} squares &mdash; {bed.cols * bed.rows} sq ft total
+            {bed.cols} × {bed.rows} rutor &mdash; {bed.cols * 30}×{bed.rows * 30} cm
           </p>
         </div>
       </div>

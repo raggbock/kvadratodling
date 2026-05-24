@@ -147,7 +147,7 @@ export default function BedPlanner({ bedId, rows, cols, initialSlots, palette }:
       <div className="flex-1">
         <div className="mb-3 flex items-center justify-between text-sm text-gray-500">
           <span>
-            {filledCount} / {total} squares planted
+            {filledCount} / {total} rutor planterade
           </span>
           <span>
             {palette.length === 0 ? (
@@ -180,7 +180,7 @@ export default function BedPlanner({ bedId, rows, cols, initialSlots, palette }:
                 <button
                   key={key}
                   onClick={() => handleCellClick(r, c)}
-                  title={slot ? `${slot.plantName} — click to remove` : `Plant ${selectedPlant?.name ?? 'nothing'}`}
+                  title={slot ? `${slot.plantName} — klicka för att ta bort` : selectedPlant ? `Plantera ${selectedPlant.name}` : 'Tom ruta'}
                   className={`
                     flex h-12 w-12 items-center justify-center rounded-lg border text-2xl transition select-none
                     sm:h-14 sm:w-14
@@ -204,7 +204,7 @@ export default function BedPlanner({ bedId, rows, cols, initialSlots, palette }:
         {slots.size > 0 && (
           <div className="mt-4 rounded-lg border border-gray-100 bg-white p-3">
             <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
-              What&apos;s planted
+              Det här är planterat
             </h3>
             <div className="flex flex-wrap gap-2">
               {Array.from(

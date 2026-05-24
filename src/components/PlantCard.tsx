@@ -17,16 +17,14 @@ export function PlantCard({ plant }: Props) {
           {plant.emoji}
         </span>
         <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-500">
-          {plant.plantsPerSquare === 1
-            ? '1 per square'
-            : `${plant.plantsPerSquare} per square`}
+          {plant.plantsPerSquare} per ruta
         </span>
       </div>
 
       <h3 className="font-semibold text-gray-900 group-hover:text-green-700">
-        {plant.name}
+        {plant.nameSv}
       </h3>
-      <p className="text-xs text-gray-400">{plant.nameSv}</p>
+      <p className="text-xs text-gray-400">{plant.name}</p>
 
       <p className="mt-2 line-clamp-2 text-sm text-gray-600">{plant.description}</p>
 
@@ -34,10 +32,10 @@ export function PlantCard({ plant }: Props) {
         <span title={SUN_LABELS[plant.sunRequirement]}>
           {SUN_ICONS[plant.sunRequirement]} {SUN_LABELS[plant.sunRequirement]}
         </span>
-        <span title={`Water: ${WATER_LABELS[plant.waterRequirement]}`}>
-          {WATER_ICONS[plant.waterRequirement]} Water
+        <span title={`Vatten: ${WATER_LABELS[plant.waterRequirement]}`}>
+          {WATER_ICONS[plant.waterRequirement]} {WATER_LABELS[plant.waterRequirement]}
         </span>
-        <span>⏱ {plant.daysToHarvest}d</span>
+        <span>⏱ {plant.daysToHarvest} d</span>
       </div>
 
       {plant.tags.length > 0 && (

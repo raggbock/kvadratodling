@@ -3,17 +3,17 @@ import { PLANTS } from '@/lib/plants';
 import { CatalogClient } from './CatalogClient';
 
 export const metadata: Metadata = {
-  title: 'Plant Catalog — Kvadratodling',
-  description: 'Browse 25+ plants with spacing, sun and water needs, and companion-planting hints.',
+  title: 'Växtkatalog | Kvadratodling',
+  description: 'Bläddra bland 25+ växter med plantering per ruta, sol- och vattenbehov och sällskapsplanterings-tips.',
 };
 
 export default function CatalogPage() {
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight text-gray-900">Plant Catalog</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-gray-900">Växtkatalog</h1>
         <p className="mt-2 text-gray-500">
-          {PLANTS.length} plants — click any card for spacing, care tips, and companion hints.
+          {PLANTS.length} växter — klicka på ett kort för plantering, skötseltips och sällskapsplantering.
         </p>
       </div>
       <CatalogClient plants={PLANTS} />

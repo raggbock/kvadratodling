@@ -10,14 +10,14 @@ interface Props {
 }
 
 const SUN_OPTIONS: { value: SunRequirement | ''; label: string }[] = [
-  { value: '', label: 'Any sun' },
+  { value: '', label: 'Alla sollägen' },
   { value: 'full', label: SUN_LABELS.full },
   { value: 'partial', label: SUN_LABELS.partial },
   { value: 'shade', label: SUN_LABELS.shade },
 ];
 
 const WATER_OPTIONS: { value: WaterRequirement | ''; label: string }[] = [
-  { value: '', label: 'Any water' },
+  { value: '', label: 'Alla vattenbehov' },
   { value: 'low', label: WATER_LABELS.low },
   { value: 'medium', label: WATER_LABELS.medium },
   { value: 'high', label: WATER_LABELS.high },
@@ -46,7 +46,7 @@ export function CatalogClient({ plants }: Props) {
       <div className="mb-6 flex flex-wrap gap-3">
         <input
           type="search"
-          placeholder="Search plants…"
+          placeholder="Sök växter…"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           className="flex-1 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm shadow-sm placeholder:text-gray-400 focus:border-green-400 focus:outline-none focus:ring-2 focus:ring-green-100"
@@ -77,14 +77,14 @@ export function CatalogClient({ plants }: Props) {
 
       {/* Count */}
       <p className="mb-4 text-sm text-gray-500">
-        {filtered.length} plant{filtered.length !== 1 ? 's' : ''}
-        {(query || sun || water) && ' matching filters'}
+        {filtered.length} {filtered.length === 1 ? 'växt' : 'växter'}
+        {(query || sun || water) && ' matchar'}
       </p>
 
       {/* Grid */}
       {filtered.length === 0 ? (
         <div className="rounded-xl border border-dashed border-gray-200 p-12 text-center text-gray-400">
-          No plants match your filters.
+          Inga växter matchar dina filter.
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">

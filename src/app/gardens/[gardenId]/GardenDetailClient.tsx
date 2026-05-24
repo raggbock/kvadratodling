@@ -70,7 +70,7 @@ export function GardenDetailClient({ garden }: { garden: Garden }) {
       {/* Breadcrumb */}
       <div className="mb-2 text-sm text-gray-500">
         <Link href="/gardens" className="hover:text-green-700">
-          My gardens
+          Mina odlingar
         </Link>{' '}
         /
       </div>
@@ -96,13 +96,13 @@ export function GardenDetailClient({ garden }: { garden: Garden }) {
             href={`/gardens/${gardenId}/edit`}
             className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
           >
-            Edit
+            Redigera
           </Link>
           <Link
             href={`/gardens/${gardenId}/beds/new`}
             className="rounded-md bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700"
           >
-            + Add bed
+            + Lägg till låda
           </Link>
         </div>
       </div>
@@ -131,17 +131,17 @@ export function GardenDetailClient({ garden }: { garden: Garden }) {
       {garden.beds.length === 0 ? (
         <div className="rounded-xl border-2 border-dashed border-gray-300 bg-white py-16 text-center">
           <div className="mb-3 text-4xl">🛏</div>
-          <h2 className="mb-1 font-semibold text-gray-700">No beds yet</h2>
+          <h2 className="mb-1 font-semibold text-gray-700">Inga odlingslådor än</h2>
           <p className="mb-4 text-sm text-gray-500">
             {layout && layout.beds.length > 0
-              ? 'Use the auto-generate button above, or add a bed manually.'
-              : 'Add a bed to start planning your layout.'}
+              ? 'Använd auto-genereringsknappen ovan, eller lägg till en låda manuellt.'
+              : 'Lägg till en låda för att börja planera.'}
           </p>
           <Link
             href={`/gardens/${gardenId}/beds/new`}
             className="rounded-md bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700"
           >
-            Add a bed manually
+            Lägg till en låda manuellt
           </Link>
         </div>
       ) : (
@@ -159,11 +159,11 @@ export function GardenDetailClient({ garden }: { garden: Garden }) {
                 >
                   <h2 className="font-semibold text-gray-900">{bed.name}</h2>
                   <p className="mt-1 text-sm text-gray-500">
-                    {bed.cols} × {bed.rows} rutor ({bed.cols * bed.rows} sq ft)
+                    {bed.cols} × {bed.rows} rutor ({bed.cols * 30}×{bed.rows * 30} cm)
                   </p>
                   <div className="mt-3">
                     <div className="mb-1 flex justify-between text-xs text-gray-400">
-                      <span>{filled} planted</span>
+                      <span>{filled} planterade</span>
                       <span>{pct}%</span>
                     </div>
                     <div className="h-1.5 w-full rounded-full bg-gray-100">
@@ -200,7 +200,7 @@ export function GardenDetailClient({ garden }: { garden: Garden }) {
           disabled={deleting}
           className="text-sm text-red-500 hover:text-red-700 disabled:opacity-50"
         >
-          {deleting ? 'Deleting…' : 'Delete this garden'}
+          {deleting ? 'Tar bort…' : 'Ta bort den här odlingen'}
         </button>
       </div>
     </div>
