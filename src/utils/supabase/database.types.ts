@@ -207,63 +207,90 @@ export type Database = {
           created_at: string
           days_to_maturity_max: number | null
           days_to_maturity_min: number | null
+          description: string | null
           direct_sow_days_before_frost: number | null
+          diseases: string[] | null
           emoji: string
+          english_name: string | null
           family: string | null
           frost_tolerant: boolean
           id: string
           image_url: string | null
           is_active: boolean
           notes: string | null
+          pests: string[] | null
           plants_per_sqft: number
           scientific_name: string | null
           slug: string
           sow_indoors_days_before_frost: number | null
           sun_requirement: Database["public"]["Enums"]["sun_requirement"]
+          tags: string[] | null
+          tips: string | null
           transplant_days_after_frost: number | null
           water_need: Database["public"]["Enums"]["water_need"]
+          zones_max: string | null
+          zones_min: string | null
+          zones_note: string | null
         }
         Insert: {
           common_name: string
           created_at?: string
           days_to_maturity_max?: number | null
           days_to_maturity_min?: number | null
+          description?: string | null
           direct_sow_days_before_frost?: number | null
+          diseases?: string[] | null
           emoji?: string
+          english_name?: string | null
           family?: string | null
           frost_tolerant?: boolean
           id?: string
           image_url?: string | null
           is_active?: boolean
           notes?: string | null
+          pests?: string[] | null
           plants_per_sqft: number
           scientific_name?: string | null
           slug: string
           sow_indoors_days_before_frost?: number | null
           sun_requirement: Database["public"]["Enums"]["sun_requirement"]
+          tags?: string[] | null
+          tips?: string | null
           transplant_days_after_frost?: number | null
           water_need: Database["public"]["Enums"]["water_need"]
+          zones_max?: string | null
+          zones_min?: string | null
+          zones_note?: string | null
         }
         Update: {
           common_name?: string
           created_at?: string
           days_to_maturity_max?: number | null
           days_to_maturity_min?: number | null
+          description?: string | null
           direct_sow_days_before_frost?: number | null
+          diseases?: string[] | null
           emoji?: string
+          english_name?: string | null
           family?: string | null
           frost_tolerant?: boolean
           id?: string
           image_url?: string | null
           is_active?: boolean
           notes?: string | null
+          pests?: string[] | null
           plants_per_sqft?: number
           scientific_name?: string | null
           slug?: string
           sow_indoors_days_before_frost?: number | null
           sun_requirement?: Database["public"]["Enums"]["sun_requirement"]
+          tags?: string[] | null
+          tips?: string | null
           transplant_days_after_frost?: number | null
           water_need?: Database["public"]["Enums"]["water_need"]
+          zones_max?: string | null
+          zones_min?: string | null
+          zones_note?: string | null
         }
         Relationships: []
       }
