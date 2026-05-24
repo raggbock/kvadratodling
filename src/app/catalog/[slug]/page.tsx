@@ -1,3 +1,4 @@
+import { cache } from 'react';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -11,18 +12,30 @@ import {
 } from '@/lib/plant-display';
 import { CompanionHint } from '@/components/CompanionHint';
 
+// Catalog data is public + slow-moving — let Next.js cache the page for an hour.
+export const revalidate = 3600;
+
 interface Props {
   params: Promise<{ slug: string }>;
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug } = await params;
+// React.cache dedupes the plant fetch across generateMetadata + the page render
+// within a single request. Without this, every catalog detail page hits Supabase twice.
+const getPlant = cache(async (slug: string) => {
   const supabase = await createClient();
-  const { data: plant } = await supabase
+  const { data } = await supabase
     .from('plants')
-    .select('common_name, description')
+    .select(
+      'id, slug, common_name, english_name, scientific_name, family, emoji, plants_per_sqft, sun_requirement, water_need, days_to_maturity_min, days_to_maturity_max, description, tips, pests, diseases, tags, zones_min, zones_max, zones_note',
+    )
     .eq('slug', slug)
     .single();
+  return data;
+});
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const plant = await getPlant(slug);
   if (!plant) return {};
   return {
     title: `${plant.common_name} | Kvadratodling`,
@@ -33,14 +46,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function PlantDetailPage({ params }: Props) {
   const { slug } = await params;
   const supabase = await createClient();
-
-  const { data: plant } = await supabase
-    .from('plants')
-    .select(
-      'id, slug, common_name, english_name, scientific_name, family, emoji, plants_per_sqft, sun_requirement, water_need, days_to_maturity_min, days_to_maturity_max, description, tips, pests, diseases, tags, zones_min, zones_max, zones_note',
-    )
-    .eq('slug', slug)
-    .single();
+  const plant = await getPlant(slug);
 
   if (!plant) notFound();
 

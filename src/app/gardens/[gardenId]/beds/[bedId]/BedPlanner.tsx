@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { track } from '@/lib/analytics';
 
 interface PalettePlant {
@@ -39,8 +39,26 @@ export default function BedPlanner({ bedId, rows, cols, initialSlots, palette }:
 
   const selectedPlant = palette.find((p) => p.slug === selectedSlug) ?? null;
 
-  const filteredPlants = palette.filter((p) =>
-    p.name.toLowerCase().includes(search.toLowerCase())
+  const filteredPlants = useMemo(() => {
+    const q = search.toLowerCase();
+    return q ? palette.filter((p) => p.name.toLowerCase().includes(q)) : palette;
+  }, [palette, search]);
+
+  // One O(n) pass instead of an O(n²) filter-per-unique-plant in the legend below.
+  const legendItems = useMemo(() => {
+    const counts = new Map<string, { emoji: string | null; name: string | null; count: number }>();
+    for (const slot of slots.values()) {
+      if (!slot.plantSlug) continue;
+      const existing = counts.get(slot.plantSlug);
+      if (existing) existing.count += 1;
+      else counts.set(slot.plantSlug, { emoji: slot.plantEmoji, name: slot.plantName, count: 1 });
+    }
+    return Array.from(counts, ([slug, v]) => ({ slug, ...v }));
+  }, [slots]);
+
+  const gridStyle = useMemo(
+    () => ({ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }),
+    [cols],
   );
 
   const handleCellClick = useCallback(
@@ -174,7 +192,7 @@ export default function BedPlanner({ bedId, rows, cols, initialSlots, palette }:
 
         <div
           className="inline-grid gap-1 rounded-xl border border-gray-200 bg-white p-3 shadow-sm"
-          style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
+          style={gridStyle}
         >
           {Array.from({ length: rows }, (_, r) =>
             Array.from({ length: cols }, (_, c) => {
@@ -214,22 +232,15 @@ export default function BedPlanner({ bedId, rows, cols, initialSlots, palette }:
               Det här är planterat
             </h3>
             <div className="flex flex-wrap gap-2">
-              {Array.from(
-                new Map(Array.from(slots.values()).map((s) => [s.plantSlug, s])).values()
-              ).map((s) => {
-                const count = Array.from(slots.values()).filter(
-                  (x) => x.plantSlug === s.plantSlug
-                ).length;
-                return (
-                  <span
-                    key={s.plantSlug}
-                    className="flex items-center gap-1 rounded-full bg-green-50 px-2.5 py-1 text-xs text-green-800"
-                  >
-                    {s.plantEmoji} {s.plantName}{' '}
-                    <span className="rounded-full bg-green-200 px-1.5 font-medium">{count}</span>
-                  </span>
-                );
-              })}
+              {legendItems.map((item) => (
+                <span
+                  key={item.slug}
+                  className="flex items-center gap-1 rounded-full bg-green-50 px-2.5 py-1 text-xs text-green-800"
+                >
+                  {item.emoji} {item.name}{' '}
+                  <span className="rounded-full bg-green-200 px-1.5 font-medium">{item.count}</span>
+                </span>
+              ))}
             </div>
           </div>
         )}

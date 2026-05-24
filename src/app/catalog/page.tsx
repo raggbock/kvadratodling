@@ -2,6 +2,9 @@ import type { Metadata } from 'next';
 import { createClient } from '@/utils/supabase/server';
 import { CatalogClient } from './CatalogClient';
 
+// Public catalog. Revalidate hourly — plant updates are rare.
+export const revalidate = 3600;
+
 export const metadata: Metadata = {
   title: 'Växtkatalog | Kvadratodling',
   description:
