@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="sv">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="color-scheme" content="light only" />
+    <meta name="supported-color-schemes" content="light" />
+    <title>Logga in på Kvadratodling</title>
+  </head>
+  <body style="margin:0;padding:0;background-color:#f7faf7;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;color:#1f2937;">
+    <!-- Preheader (hidden) -->
+    <div style="display:none;max-height:0;overflow:hidden;mso-hide:all;">
+      En engångslänk till din odling på Kvadratodling. Giltig i 60 minuter.
+    </div>
+
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f7faf7;">
+      <tr>
+        <td align="center" style="padding:32px 16px;">
+
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:520px;background-color:#ffffff;border:1px solid #e5e7eb;border-radius:16px;overflow:hidden;">
+
+            <!-- Header -->
+            <tr>
+              <td style="padding:28px 32px 8px 32px;text-align:left;">
+                <div style="font-size:22px;line-height:1;">🌱</div>
+                <div style="margin-top:8px;font-size:14px;font-weight:600;letter-spacing:0.02em;color:#16a34a;">
+                  KVADRATODLING
+                </div>
+              </td>
+            </tr>
+
+            <!-- Body -->
+            <tr>
+              <td style="padding:16px 32px 8px 32px;">
+                <h1 style="margin:0 0 12px 0;font-size:22px;line-height:1.3;font-weight:700;color:#111827;">
+                  Logga in på din odling
+                </h1>
+                <p style="margin:0 0 20px 0;font-size:15px;line-height:1.55;color:#4b5563;">
+                  Klicka på knappen nedan för att logga in. Länken är giltig i 60 minuter och kan bara användas en gång.
+                </p>
+
+                <!-- Button -->
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 24px 0;">
+                  <tr>
+                    <td bgcolor="#16a34a" style="border-radius:8px;">
+                      <a href="{{ .ConfirmationURL }}"
+                         style="display:inline-block;padding:12px 24px;font-size:15px;font-weight:600;color:#ffffff;text-decoration:none;border-radius:8px;">
+                        Logga in på Kvadratodling
+                      </a>
+                    </td>
+                  </tr>
+                </table>
+
+                <p style="margin:0 0 8px 0;font-size:13px;line-height:1.55;color:#6b7280;">
+                  Fungerar inte knappen? Kopiera och klistra in den här adressen i webbläsaren:
+                </p>
+                <p style="margin:0 0 24px 0;font-size:13px;line-height:1.55;word-break:break-all;">
+                  <a href="{{ .ConfirmationURL }}" style="color:#16a34a;text-decoration:underline;">{{ .ConfirmationURL }}</a>
+                </p>
+              </td>
+            </tr>
+
+            <!-- Divider -->
+            <tr>
+              <td style="padding:0 32px;">
+                <div style="height:1px;background-color:#f0fdf4;"></div>
+              </td>
+            </tr>
+
+            <!-- Footer -->
+            <tr>
+              <td style="padding:20px 32px 28px 32px;">
+                <p style="margin:0;font-size:12px;line-height:1.55;color:#9ca3af;">
+                  Bad du inte om den här länken? Du kan tryggt ignorera mailet — ingen kan logga in utan att klicka på din unika länk.
+                </p>
+                <p style="margin:14px 0 0 0;font-size:12px;color:#9ca3af;">
+                  Glad odling, <br />
+                  <strong style="color:#6b7280;">Kvadratodling</strong> · <a href="https://kvadratodling.se" style="color:#9ca3af;text-decoration:underline;">kvadratodling.se</a>
+                </p>
+              </td>
+            </tr>
+
+          </table>
+
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
