@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { SUN_LABELS, WATER_LABELS, type SunRequirement, type WaterNeed } from '@/lib/plant-display';
 import { PlantCard, type PlantCardPlant } from '@/components/PlantCard';
+import { track } from '@/lib/analytics';
 
 type SunFilter = SunRequirement | '';
 type WaterFilter = WaterNeed | '';
@@ -25,6 +26,11 @@ export function CatalogClient({ plants }: { plants: PlantCardPlant[] }) {
   const [query, setQuery] = useState('');
   const [sun, setSun] = useState<SunFilter>('');
   const [water, setWater] = useState<WaterFilter>('');
+
+  useEffect(() => {
+    track({ name: 'catalog_viewed', properties: { plant_count: plants.length } });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const filtered = useMemo(() => {
     const q = query.toLowerCase();

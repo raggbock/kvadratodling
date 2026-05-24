@@ -2,7 +2,6 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 import { computeSchedule, PlantScheduleInput } from "@/lib/plantSchedule";
 import { ScheduleView } from "@/components/ScheduleView";
-import { CATALOG_PLANTS } from "@/data/plants";
 
 function defaultFrostDate(): string {
   return `${new Date().getFullYear()}-05-01`;
@@ -32,20 +31,30 @@ export default async function SchedulePage({ params, searchParams }: PageProps) 
   let plantsForSchedule: PlantScheduleInput[];
   let frostDateIso: string;
 
+  const supabase = await createClient();
+
   if (gardenId === "demo") {
     frostDateIso = parseFrostDate(frostDateParam);
-    plantsForSchedule = CATALOG_PLANTS.map((p) => ({
-      id: p.slug,
-      commonName: p.commonName,
+    // Demo mode shows the planting schedule for every active plant in the
+    // catalog — same data source as /catalog, no per-user state.
+    const { data: plants } = await supabase
+      .from("plants")
+      .select(
+        "id, slug, common_name, emoji, sow_indoors_days_before_frost, direct_sow_days_before_frost, transplant_days_after_frost, days_to_maturity_min, days_to_maturity_max",
+      )
+      .eq("is_active", true)
+      .order("common_name");
+    plantsForSchedule = (plants ?? []).map((p) => ({
+      id: p.slug,                          // use slug as id for demo — stable across reseeds
+      commonName: p.common_name,
       emoji: p.emoji,
-      sowIndoorsDaysBeforeFrost: p.sowIndoorsDaysBeforeFrost,
-      directSowDaysBeforeFrost: p.directSowDaysBeforeFrost,
-      transplantDaysAfterFrost: p.transplantDaysAfterFrost,
-      daysToMaturityMin: p.daysToMaturityMin,
-      daysToMaturityMax: p.daysToMaturityMax,
+      sowIndoorsDaysBeforeFrost: p.sow_indoors_days_before_frost,
+      directSowDaysBeforeFrost: p.direct_sow_days_before_frost,
+      transplantDaysAfterFrost: p.transplant_days_after_frost,
+      daysToMaturityMin: p.days_to_maturity_min,
+      daysToMaturityMax: p.days_to_maturity_max,
     }));
   } else {
-    const supabase = await createClient();
     const { data: garden } = await supabase
       .from("gardens")
       .select(`

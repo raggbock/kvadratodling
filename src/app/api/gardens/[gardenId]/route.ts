@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireUser } from '@/lib/auth';
+import { apiError } from '@/lib/api-errors';
 import { createClient } from '@/utils/supabase/server';
 import type { TablesUpdate } from '@/utils/supabase/database.types';
 import { z } from 'zod';
@@ -28,8 +29,8 @@ export async function GET(
       .single();
     if (error || !garden) return NextResponse.json({ error: 'Not found' }, { status: 404 });
     return NextResponse.json(garden);
-  } catch {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  } catch (err) {
+    return apiError(err, 'api/gardens/[id] GET');
   }
 }
 
@@ -60,8 +61,7 @@ export async function PATCH(
     if (error || !garden) return NextResponse.json({ error: 'Not found' }, { status: 404 });
     return NextResponse.json(garden);
   } catch (err) {
-    if (err instanceof z.ZodError) return NextResponse.json({ error: err.flatten() }, { status: 400 });
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    return apiError(err, 'api/gardens/[id] PATCH');
   }
 }
 
@@ -73,9 +73,19 @@ export async function DELETE(
     await requireUser();
     const supabase = await createClient();
     const { gardenId } = await params;
-    await supabase.from('gardens').delete().eq('id', gardenId);
+    // RLS silently filters rows the user can't touch — verify a row was
+    // actually deleted, otherwise 204 lies to the client.
+    const { data, error } = await supabase
+      .from('gardens')
+      .delete()
+      .eq('id', gardenId)
+      .select('id');
+    if (error) throw error;
+    if (!data || data.length === 0) {
+      return NextResponse.json({ error: 'Not found' }, { status: 404 });
+    }
     return new NextResponse(null, { status: 204 });
-  } catch {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  } catch (err) {
+    return apiError(err, 'api/gardens/[id] DELETE');
   }
 }

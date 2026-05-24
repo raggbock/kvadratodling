@@ -5,7 +5,7 @@ export async function requireUser() {
   const { data: { user }, error } = await supabase.auth.getUser();
   if (!user || error) throw new Error('Unauthorized');
 
-  await supabase.from('users').upsert(
+  const { error: upsertErr } = await supabase.from('users').upsert(
     {
       id: user.id,
       email: user.email!,
@@ -14,6 +14,9 @@ export async function requireUser() {
     },
     { onConflict: 'id' }
   );
+  // Surface upsert failures (RLS / GRANT regression, schema drift) instead of
+  // silently passing the user through.
+  if (upsertErr) throw new Error(`users upsert failed: ${upsertErr.message}`);
 
   return { id: user.id, email: user.email! };
 }

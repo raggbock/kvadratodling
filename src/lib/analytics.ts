@@ -1,12 +1,25 @@
+'use client';
+
 import posthog from 'posthog-js';
 
+/**
+ * Per-action analytics events. PostHogProvider handles auto-pageviews;
+ * this module is for explicit user-action events that auto-tracking misses.
+ */
 export type AnalyticsEvent =
-  | { name: 'signed_up'; properties?: { method?: string } }
-  | { name: 'garden_created'; properties: { plant_count: number; total_squares: number } }
-  | { name: 'plant_added'; properties: { plant_slug: string; square_x: number; square_y: number } }
-  | { name: 'catalog_viewed'; properties?: Record<string, unknown> };
+  | { name: 'signed_out' }
+  | { name: 'garden_created'; properties: { has_dimensions: boolean } }
+  | { name: 'garden_deleted' }
+  | { name: 'plant_added'; properties: { plant_slug: string; bed_id: string; row: number; col: number } }
+  | { name: 'plant_removed'; properties: { bed_id: string; row: number; col: number } }
+  | { name: 'catalog_viewed'; properties: { plant_count: number } };
 
 export function track(event: AnalyticsEvent) {
   if (typeof window === 'undefined') return;
-  posthog.capture(event.name, event.properties ?? {});
+  // Don't crash if posthog isn't initialised (no env var, ad-blocker, etc.)
+  try {
+    posthog.capture(event.name, 'properties' in event ? event.properties : undefined);
+  } catch {
+    // swallow — analytics must never break the user flow
+  }
 }

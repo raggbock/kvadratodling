@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { SWEDISH_ZONES, lastFrostDateForYear } from '@/lib/zones';
 import { SwedenZoneMap } from '@/components/SwedenZoneMap';
 import { computeOptimalBeds, summarizeBedSizes } from '@/lib/bedLayout';
+import { track } from '@/lib/analytics';
 
 const MONTH_SV = ['jan','feb','mar','apr','maj','jun','jul','aug','sep','okt','nov','dec'];
 
@@ -63,6 +64,7 @@ export default function NewGardenForm() {
       });
       if (!res.ok) throw new Error('Failed to create garden');
       const garden = await res.json();
+      track({ name: 'garden_created', properties: { has_dimensions: !!(garden.width_cm && garden.length_cm) } });
       router.push(`/gardens/${garden.id}`);
     } catch {
       setError('Något gick fel. Försök igen.');

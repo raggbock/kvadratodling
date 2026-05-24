@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import { track } from '@/lib/analytics';
 
 interface PalettePlant {
   slug: string;
@@ -58,6 +59,12 @@ export default function BedPlanner({ bedId, rows, cols, initialSlots, palette }:
           body: JSON.stringify({ row, col, plantSlug: newSlug }),
         });
         if (!res.ok) throw new Error('Save failed');
+
+        if (newSlug === null) {
+          track({ name: 'plant_removed', properties: { bed_id: bedId, row, col } });
+        } else {
+          track({ name: 'plant_added', properties: { plant_slug: newSlug, bed_id: bedId, row, col } });
+        }
 
         setSlots((prev) => {
           const next = new Map(prev);

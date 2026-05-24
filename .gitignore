@@ -53,3 +53,12 @@ dev.db
 /db
 /db-wal
 /db-shm
+
+# Claude Code / MCP / Playwright artifacts
+.claude/
+.mcp.json
+.playwright-mcp/
+
+# QA screenshots
+qa-*.png
+kva20-*.png

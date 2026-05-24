@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { computeOptimalBeds, summarizeBedSizes } from '@/lib/bedLayout';
+import { track } from '@/lib/analytics';
 
 interface Bed {
   id: string;
@@ -64,7 +65,8 @@ export function GardenDetailClient({ garden }: { garden: Garden }) {
     if (!confirm(`Ta bort trädgården "${garden.name}"? Det går inte att ångra.`)) return;
     setDeleting(true);
     try {
-      await fetch(`/api/gardens/${garden.id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/gardens/${garden.id}`, { method: 'DELETE' });
+      if (res.ok) track({ name: 'garden_deleted' });
       router.push('/gardens');
     } catch {
       setDeleting(false);

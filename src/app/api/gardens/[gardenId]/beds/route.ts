@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireUser } from '@/lib/auth';
+import { apiError } from '@/lib/api-errors';
 import { createClient } from '@/utils/supabase/server';
 import { z } from 'zod';
 
@@ -44,7 +45,6 @@ export async function POST(
     if (error) throw error;
     return NextResponse.json(bed, { status: 201 });
   } catch (err) {
-    if (err instanceof z.ZodError) return NextResponse.json({ error: err.flatten() }, { status: 400 });
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    return apiError(err, 'api/gardens/[id]/beds POST');
   }
 }

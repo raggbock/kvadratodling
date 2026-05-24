@@ -2,11 +2,13 @@
 
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
+import { track } from '@/lib/analytics';
 
 export function SignOutButton() {
   const router = useRouter();
 
   async function handleSignOut() {
+    track({ name: 'signed_out' });
     const supabase = createClient();
     await supabase.auth.signOut();
     router.push('/');
