@@ -1,14 +1,16 @@
-import type { CompanionHint as CompanionHintType } from '@/lib/companion-planting';
-import { getPlant } from '@/lib/plants';
-
+/**
+ * Renders one companion / antagonist pairing on the plant detail page.
+ * Takes the other plant's display data directly — no slug lookup, so the
+ * component is decoupled from any client-side plant catalog.
+ */
 interface Props {
-  hint: CompanionHintType;
+  kind: 'good' | 'bad';
+  other: { slug: string; common_name: string; emoji: string };
+  notes: string | null;
 }
 
-export function CompanionHint({ hint }: Props) {
-  const other = getPlant(hint.otherPlantSlug);
-  const isGood = hint.kind === 'good';
-
+export function CompanionHint({ kind, other, notes }: Props) {
+  const isGood = kind === 'good';
   return (
     <div
       className={`flex items-start gap-2 rounded-lg px-3 py-2 text-sm ${
@@ -20,34 +22,15 @@ export function CompanionHint({ hint }: Props) {
       <span className="mt-0.5 shrink-0 text-base">{isGood ? '✅' : '⚠️'}</span>
       <div className="min-w-0">
         <span className="font-medium">
-          {other ? `${other.emoji} ${other.name}` : hint.otherPlantSlug}
+          {other.emoji} {other.common_name}
         </span>
-        {' — '}
-        <span>{hint.reason}</span>
+        {notes && (
+          <>
+            {' — '}
+            <span>{notes}</span>
+          </>
+        )}
       </div>
     </div>
-  );
-}
-
-/**
- * Inline badge version used in the grid placement UI.
- * Shows a small indicator (no full description).
- */
-export function CompanionHintBadge({ hint }: Props) {
-  const other = getPlant(hint.otherPlantSlug);
-  const isGood = hint.kind === 'good';
-
-  return (
-    <span
-      title={hint.reason}
-      className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
-        isGood
-          ? 'bg-green-100 text-green-700'
-          : 'bg-red-100 text-red-700'
-      }`}
-    >
-      {isGood ? '✅' : '⚠️'}
-      {other ? other.name : hint.otherPlantSlug}
-    </span>
   );
 }

@@ -1,7 +1,6 @@
 import { notFound, redirect } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/utils/supabase/server';
-import { getPlant, PLANTS as CATALOG_PLANTS } from '@/lib/plants';
 import BedPlanner from './BedPlanner';
 
 export default async function BedPage({
@@ -28,24 +27,28 @@ export default async function BedPage({
 
   const { data: dbPlants } = await supabase
     .from('plants')
-    .select('slug, common_name')
+    .select('slug, common_name, emoji')
     .eq('is_active', true)
     .order('common_name');
 
-  const palette = (dbPlants ?? []).map((p) => {
-    const catalogMatch = CATALOG_PLANTS.find((c) => c.slug === p.slug);
-    return { slug: p.slug, name: p.common_name, emoji: catalogMatch?.emoji ?? '🌱' };
-  });
+  const palette = (dbPlants ?? []).map((p) => ({
+    slug: p.slug,
+    name: p.common_name,
+    emoji: p.emoji,
+  }));
 
-  const slots = bed.planting_slots as unknown as { row: number; col: number; plant: { slug: string; common_name: string } | null }[];
+  const slots = bed.planting_slots as unknown as {
+    row: number;
+    col: number;
+    plant: { slug: string; common_name: string } | null;
+  }[];
   const initialSlots = slots.map((s) => {
-    const catalogPlant = s.plant ? getPlant(s.plant.slug) : null;
     const paletteMatch = s.plant ? palette.find((p) => p.slug === s.plant!.slug) : null;
     return {
       row: s.row,
       col: s.col,
       plantSlug: s.plant?.slug ?? null,
-      plantEmoji: paletteMatch?.emoji ?? catalogPlant?.emoji ?? null,
+      plantEmoji: paletteMatch?.emoji ?? null,
       plantName: s.plant?.common_name ?? null,
     };
   });
