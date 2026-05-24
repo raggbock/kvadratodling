@@ -49,7 +49,7 @@ export default function NewBedPage() {
       const res = await fetch(`/api/gardens/${gardenId}/beds`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, rows, cols }),
+        body: JSON.stringify({ name, rows, cols, widthCm, lengthCm }),
       });
       if (!res.ok) throw new Error('Failed');
       const bed = await res.json();

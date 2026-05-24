@@ -7,8 +7,10 @@ const MIN_BED_LENGTH_SQUARES = 4;   // 120cm — anything shorter isn't worth th
 
 export interface BedConfig {
   name: string;
-  cols: number; // width in squares
-  rows: number; // depth in squares
+  cols: number;    // width in squares
+  rows: number;    // depth in squares
+  widthCm: number; // real-world width in cm (cols * SQUARE_CM for auto-layout)
+  lengthCm: number;
 }
 
 export interface BedLayout {
@@ -59,6 +61,8 @@ export function computeOptimalBeds(widthCm: number, lengthCm: number): BedLayout
         name: `Odlingslåda ${beds.length + 1}`,
         cols: bedCols,
         rows: squares,
+        widthCm: bedCols * SQUARE_CM,
+        lengthCm: squares * SQUARE_CM,
       });
     }
   }

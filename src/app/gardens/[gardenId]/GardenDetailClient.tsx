@@ -10,6 +10,8 @@ interface Bed {
   name: string;
   rows: number;
   cols: number;
+  widthCm: number | null;
+  lengthCm: number | null;
   plantingSlots: { id: string }[];
 }
 
@@ -42,7 +44,13 @@ export function GardenDetailClient({ garden }: { garden: Garden }) {
           fetch(`/api/gardens/${garden.id}/beds`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name: bed.name, rows: bed.rows, cols: bed.cols }),
+            body: JSON.stringify({
+              name: bed.name,
+              rows: bed.rows,
+              cols: bed.cols,
+              widthCm: bed.widthCm,
+              lengthCm: bed.lengthCm,
+            }),
           })
         )
       );
@@ -159,7 +167,7 @@ export function GardenDetailClient({ garden }: { garden: Garden }) {
                 >
                   <h2 className="font-semibold text-gray-900">{bed.name}</h2>
                   <p className="mt-1 text-sm text-gray-500">
-                    {bed.cols} × {bed.rows} rutor ({bed.cols * 30}×{bed.rows * 30} cm)
+                    {bed.widthCm ?? bed.cols * 30}×{bed.lengthCm ?? bed.rows * 30} cm ({bed.cols} × {bed.rows} rutor)
                   </p>
                   <div className="mt-3">
                     <div className="mb-1 flex justify-between text-xs text-gray-400">

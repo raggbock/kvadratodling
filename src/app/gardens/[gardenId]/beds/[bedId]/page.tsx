@@ -16,7 +16,7 @@ export default async function BedPage({
   const { gardenId, bedId } = await params;
   const { data: bed } = await supabase
     .from('beds')
-    .select('id, name, rows, cols, garden:gardens(name), planting_slots(id, row, col, plant:plants(slug, common_name))')
+    .select('id, name, rows, cols, width_cm, length_cm, garden:gardens(name), planting_slots(id, row, col, plant:plants(slug, common_name))')
     .eq('id', bedId)
     .eq('garden_id', gardenId)
     .single();
@@ -66,7 +66,14 @@ export default async function BedPage({
         <div>
           <h1 className="text-2xl font-bold text-gray-900">{bed.name}</h1>
           <p className="mt-1 text-sm text-gray-500">
-            {bed.cols} × {bed.rows} rutor &mdash; {bed.cols * 30}×{bed.rows * 30} cm
+            {bed.width_cm ?? bed.cols * 30}×{bed.length_cm ?? bed.rows * 30} cm
+            &mdash; {bed.cols} × {bed.rows} rutor
+            {((bed.width_cm ?? bed.cols * 30) > bed.cols * 30 ||
+              (bed.length_cm ?? bed.rows * 30) > bed.rows * 30) && (
+              <span className="ml-2 text-xs text-amber-600">
+                (planeras som {bed.cols * 30}×{bed.rows * 30} cm — resten är utanför rutnätet)
+              </span>
+            )}
           </p>
         </div>
       </div>

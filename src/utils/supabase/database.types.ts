@@ -23,30 +23,36 @@ export type Database = {
           created_at: string
           garden_id: string
           id: string
+          length_cm: number | null
           name: string
           notes: string | null
           rows: number
           updated_at: string
+          width_cm: number | null
         }
         Insert: {
           cols: number
           created_at?: string
           garden_id: string
           id?: string
+          length_cm?: number | null
           name: string
           notes?: string | null
           rows: number
           updated_at?: string
+          width_cm?: number | null
         }
         Update: {
           cols?: number
           created_at?: string
           garden_id?: string
           id?: string
+          length_cm?: number | null
           name?: string
           notes?: string | null
           rows?: number
           updated_at?: string
+          width_cm?: number | null
         }
         Relationships: [
           {

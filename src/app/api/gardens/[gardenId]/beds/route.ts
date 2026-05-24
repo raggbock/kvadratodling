@@ -7,6 +7,10 @@ const CreateBedSchema = z.object({
   name: z.string().min(1).max(100),
   rows: z.number().int().min(1).max(20),
   cols: z.number().int().min(1).max(20),
+  // Real-world bed dimensions in cm. Optional for backwards compat — old
+  // callers that only send rows/cols still work and the server derives cm.
+  widthCm: z.number().int().min(30).max(2000).optional(),
+  lengthCm: z.number().int().min(30).max(2000).optional(),
   notes: z.string().max(500).optional(),
 });
 
@@ -26,7 +30,15 @@ export async function POST(
     const body = CreateBedSchema.parse(await req.json());
     const { data: bed, error } = await supabase
       .from('beds')
-      .insert({ garden_id: gardenId, ...body })
+      .insert({
+        garden_id: gardenId,
+        name: body.name,
+        rows: body.rows,
+        cols: body.cols,
+        notes: body.notes ?? null,
+        width_cm: body.widthCm ?? body.cols * 30,
+        length_cm: body.lengthCm ?? body.rows * 30,
+      })
       .select()
       .single();
     if (error) throw error;
