@@ -4,7 +4,7 @@ import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { SWEDISH_ZONES, lastFrostDateForYear } from '@/lib/zones';
 import { SwedenZoneMap } from '@/components/SwedenZoneMap';
-import { computeOptimalBeds } from '@/lib/bedLayout';
+import { computeOptimalBeds, summarizeBedSizes } from '@/lib/bedLayout';
 
 const MONTH_SV = ['jan','feb','mar','apr','maj','jun','jul','aug','sep','okt','nov','dec'];
 
@@ -151,11 +151,10 @@ export default function NewGardenForm() {
                 Optimerat layout: {layout.beds.length} odlingslåda{layout.beds.length !== 1 ? 'r' : ''}
               </p>
               <p className="mt-0.5 text-xs text-green-700">
-                Varje låda: {layout.bedCols * 30} × {layout.bedRows * 30} cm
-                ({layout.bedCols * layout.bedRows} rutor à 30×30 cm)
+                {summarizeBedSizes(layout.beds).map((g) => `${g.count} à ${g.size} cm`).join(' + ')}
               </p>
               <p className="mt-0.5 text-xs text-green-600">
-                Totalt: {layout.beds.reduce((s, b) => s + b.rows * b.cols, 0)} odlingsrutor
+                Totalt: {layout.beds.reduce((s, b) => s + b.rows * b.cols, 0)} odlingsrutor à 30×30 cm
               </p>
             </div>
           )}

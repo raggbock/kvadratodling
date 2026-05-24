@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { computeOptimalBeds } from '@/lib/bedLayout';
+import { computeOptimalBeds, summarizeBedSizes } from '@/lib/bedLayout';
 
 interface Bed {
   id: string;
@@ -113,9 +113,9 @@ export function GardenDetailClient({ garden }: { garden: Garden }) {
           <h2 className="mb-1 font-semibold text-green-900">Optimerat odlingslayout</h2>
           <p className="mb-3 text-sm text-green-700">
             Baserat på din yta ({(garden.widthCm! / 100).toFixed(1)} × {(garden.lengthCm! / 100).toFixed(1)} m)
-            passar {layout.beds.length} odlingslåda{layout.beds.length !== 1 ? 'r' : ''} på
-            {' '}{layout.bedCols * 30}×{layout.bedRows * 30} cm vardera —
-            totalt {layout.beds.reduce((s, b) => s + b.rows * b.cols, 0)} odlingsrutor à 30×30 cm.
+            passar {layout.beds.length} odlingslåda{layout.beds.length !== 1 ? 'r' : ''}
+            {' '}({summarizeBedSizes(layout.beds).map((g) => `${g.count} à ${g.size} cm`).join(' + ')})
+            — totalt {layout.beds.reduce((s, b) => s + b.rows * b.cols, 0)} odlingsrutor à 30×30 cm.
           </p>
           <button
             onClick={handleAutoGenerate}
