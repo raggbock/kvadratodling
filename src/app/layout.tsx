@@ -43,9 +43,22 @@ export default async function RootLayout({
         <PostHogProvider>
           <header className="border-b border-border-default bg-surface-default">
             <div className="mx-auto flex max-w-7xl items-center gap-6 px-4 py-3 sm:px-6 lg:px-8">
-              <Link href="/" className="flex items-center gap-2">
-                <Image src="/assets/logo-grodden-32.svg" alt="Kvadratodling" width={28} height={28} />
-                <Image src="/assets/wordmark-grodden.svg" alt="Kvadratodling" width={110} height={18} className="hidden sm:block" />
+              <Link href="/" className="flex items-center" aria-label="Kvadratodling">
+                {/* Wordmark already includes the logo glyph — show icon-only on mobile, wordmark on desktop */}
+                <Image
+                  src="/assets/logo-grodden-32.svg"
+                  alt="Kvadratodling"
+                  width={32}
+                  height={32}
+                  className="sm:hidden"
+                />
+                <Image
+                  src="/assets/wordmark-grodden.svg"
+                  alt="Kvadratodling"
+                  width={144}
+                  height={32}
+                  className="hidden sm:block"
+                />
               </Link>
               <nav className="flex flex-1 items-center gap-4 text-sm text-text-subtle">
                 <Link href="/catalog" className="hover:text-brand-default">
