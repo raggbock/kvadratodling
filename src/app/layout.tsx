@@ -73,7 +73,13 @@ export default async function RootLayout({
               <div className="flex items-center gap-3">
                 {user ? (
                   <>
-                    <span className="hidden text-sm text-text-muted sm:block">{user.email}</span>
+                    <Link
+                      href="/settings"
+                      className="hidden text-sm text-text-muted hover:text-brand-default sm:block"
+                      title="Inställningar"
+                    >
+                      {user.email}
+                    </Link>
                     <SignOutButton />
                   </>
                 ) : (

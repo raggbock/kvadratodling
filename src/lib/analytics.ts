@@ -12,7 +12,8 @@ export type AnalyticsEvent =
   | { name: 'garden_deleted' }
   | { name: 'plant_added'; properties: { plant_slug: string; bed_id: string; row: number; col: number } }
   | { name: 'plant_removed'; properties: { bed_id: string; row: number; col: number } }
-  | { name: 'catalog_viewed'; properties: { plant_count: number } };
+  | { name: 'catalog_viewed'; properties: { plant_count: number } }
+  | { name: 'digest_unsubscribed' };
 
 export function track(event: AnalyticsEvent) {
   if (typeof window === 'undefined') return;
