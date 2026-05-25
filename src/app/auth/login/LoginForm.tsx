@@ -2,22 +2,24 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
 
 const errorMessages: Record<string, string> = {
   auth_failed: 'Inloggningslänken har gått ut eller är redan använd. Begär en ny nedan.',
-  wrong_browser:
-    'Öppna länken i samma webbläsare där du begärde den, och försök igen.',
-  no_code: 'Inloggningslänken var ogiltig. Begär en ny nedan.',
+  wrong_browser: 'Öppna länken i samma webbläsare där du begärde den, och försök igen.',
+  no_code: 'Bekräftelselänken var ogiltig. Försök igen.',
+  reset_required: 'Logga in för att fortsätta.',
 };
 
 export default function LoginForm() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const urlError = searchParams.get('error');
+  const nextPath = searchParams.get('next') ?? '/gardens';
 
   const [email, setEmail] = useState('');
-  const [sent, setSent] = useState(false);
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -26,31 +28,20 @@ export default function LoginForm() {
     setLoading(true);
     setError('');
     const supabase = createClient();
-    const { error: authError } = await supabase.auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
-    });
+    const { error: authError } = await supabase.auth.signInWithPassword({ email, password });
     if (authError) {
-      setError(authError.message);
+      // Supabase returns "Invalid login credentials" for both unknown email
+      // and wrong password — keep it that way so we don't enumerate accounts.
+      setError(
+        authError.message === 'Invalid login credentials'
+          ? 'Fel e-post eller lösenord.'
+          : authError.message,
+      );
       setLoading(false);
-    } else {
-      setSent(true);
+      return;
     }
-  }
-
-  if (sent) {
-    return (
-      <div className="flex min-h-[60vh] items-center justify-center px-4">
-        <div className="text-center">
-          <div className="mb-3 text-4xl">📬</div>
-          <p className="text-lg font-semibold text-gray-900">Kolla din e-post</p>
-          <p className="mt-2 text-sm text-gray-500">
-            Vi har skickat en magisk länk till <span className="font-medium">{email}</span>.
-            Öppna den i den här webbläsaren.
-          </p>
-        </div>
-      </div>
-    );
+    router.push(nextPath);
+    router.refresh();
   }
 
   const bannerMessage = urlError ? (errorMessages[urlError] ?? errorMessages.auth_failed) : null;
@@ -70,8 +61,18 @@ export default function LoginForm() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="din@epost.se"
+            autoComplete="email"
             required
             autoFocus
+            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+          />
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Lösenord"
+            autoComplete="current-password"
+            required
             className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
           />
           {error && <p className="text-sm text-red-600">{error}</p>}
@@ -80,9 +81,17 @@ export default function LoginForm() {
             disabled={loading}
             className="w-full rounded-md bg-green-600 py-2 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-50"
           >
-            {loading ? 'Skickar…' : 'Skicka magisk länk'}
+            {loading ? 'Loggar in…' : 'Logga in'}
           </button>
         </form>
+        <div className="mt-4 text-center">
+          <Link
+            href="/auth/forgot-password"
+            className="text-xs text-gray-500 hover:text-green-700 hover:underline"
+          >
+            Glömt lösenord?
+          </Link>
+        </div>
         <p className="mt-6 text-center text-sm text-gray-500">
           Ny här?{' '}
           <Link href="/auth/signup" className="font-medium text-green-700 hover:underline">

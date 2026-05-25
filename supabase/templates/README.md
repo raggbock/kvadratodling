@@ -13,10 +13,24 @@ För varje mall:
 3. Klistra in innehållet från motsvarande `.html`-fil
 4. Sätt rubriken (se "Subject" nedan) och spara
 
-| Fil                    | Template-flik i dashboard | Subject                                          |
-| ---------------------- | ------------------------- | ------------------------------------------------ |
-| `magic_link.html`      | **Magic Link**            | `Logga in på Kvadratodling 🌱`                    |
+| Fil                    | Template-flik i dashboard | Subject                                              |
+| ---------------------- | ------------------------- | ---------------------------------------------------- |
 | `confirm_signup.html`  | **Confirm signup**        | `Välkommen till Kvadratodling — bekräfta din e-post` |
+| `reset_password.html`  | **Reset Password**        | `Återställ ditt lösenord — Kvadratodling`            |
+
+Appen använder **e-post + lösenord** för signup/login (ingen magic link).
+**Magic Link**-templaten i dashboarden behöver inte konfigureras — den
+används aldrig.
+
+## Auth-inställningar i dashboarden
+
+Förutom templates måste följande slås på i **Auth → Providers → Email**:
+
+- **Enable Email provider:** på
+- **Confirm email:** på (annars kan vem som helst signa upp med en e-post
+  de inte äger)
+- **Secure password change:** på
+- **Minimum password length:** 8 (matchar klientvalidering)
 
 ## Sender
 
