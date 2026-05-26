@@ -13,7 +13,8 @@ export type AnalyticsEvent =
   | { name: 'plant_added'; properties: { plant_slug: string; bed_id: string; row: number; col: number } }
   | { name: 'plant_removed'; properties: { bed_id: string; row: number; col: number } }
   | { name: 'catalog_viewed'; properties: { plant_count: number } }
-  | { name: 'digest_unsubscribed' };
+  | { name: 'digest_unsubscribed' }
+  | { name: 'preset_applied'; properties: { preset_id: string; bed_id: string; slot_count: number } };
 
 export function track(event: AnalyticsEvent) {
   if (typeof window === 'undefined') return;

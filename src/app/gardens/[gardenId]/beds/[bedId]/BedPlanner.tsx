@@ -2,6 +2,8 @@
 
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { track } from '@/lib/analytics';
+import { PresetMenu } from './PresetMenu';
+import type { Preset, PresetSlot } from '@/lib/presets';
 
 interface PalettePlant {
   slug: string;
@@ -152,6 +154,44 @@ export default function BedPlanner({
   const total = rows * cols;
   const isSaving = pendingSaves.size > 0;
 
+  const handleApplyPreset = useCallback(
+    async (preset: Preset, newSlots: PresetSlot[]) => {
+      // Snapshot for rollback
+      const previous = new Map(slots);
+
+      // Optimistic: replace local state immediately
+      const next = new Map<string, SlotData>();
+      for (const s of newSlots) {
+        const plant = paletteBySlug.get(s.slug);
+        next.set(`${s.row}:${s.col}`, {
+          row: s.row,
+          col: s.col,
+          plantSlug: s.slug,
+          plantEmoji: plant?.emoji ?? null,
+          plantName: plant?.name ?? null,
+        });
+      }
+      setSlots(next);
+      setSaveError(null);
+
+      try {
+        const res = await fetch(`/api/beds/${bedId}/preset`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ slots: newSlots }),
+        });
+        if (!res.ok) throw new Error('Preset apply failed');
+        track({ name: 'preset_applied', properties: { preset_id: preset.id, bed_id: bedId, slot_count: newSlots.length } });
+        setSavedAt(Date.now());
+      } catch {
+        setSlots(previous);
+        setSaveError(`Kunde inte applicera "${preset.name}". Försök igen.`);
+        throw new Error('apply failed'); // bubble up so PresetMenu doesn't close
+      }
+    },
+    [bedId, slots, paletteBySlug],
+  );
+
   return (
     <div className="flex flex-col gap-6 lg:flex-row">
       {/* Plant palette + companion hints */}
@@ -280,11 +320,20 @@ export default function BedPlanner({
 
       {/* Grid + stats */}
       <div className="flex-1">
-        <div className="mb-3 flex flex-wrap items-center justify-between gap-2 text-sm text-gray-500">
-          <span>
-            {filledCount} / {total} rutor planterade
-          </span>
-          <div className="flex items-center gap-3">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-3 text-sm text-gray-500">
+            <span>
+              {filledCount} / {total} rutor planterade
+            </span>
+            <PresetMenu
+              rows={rows}
+              cols={cols}
+              palette={palette}
+              existingCount={filledCount}
+              onApply={handleApplyPreset}
+            />
+          </div>
+          <div className="flex items-center gap-3 text-sm text-gray-500">
             <span aria-live="polite" className="text-xs">
               {isSaving ? (
                 <span className="text-gray-400">Sparar…</span>
