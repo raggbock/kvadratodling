@@ -103,6 +103,12 @@ export function GardenDetailClient({ garden }: { garden: Garden }) {
         </div>
         <div className="flex shrink-0 flex-wrap gap-2">
           <Link
+            href={`/gardens/${gardenId}/schedule`}
+            className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          >
+            📅 Odlingsschema
+          </Link>
+          <Link
             href={`/gardens/${gardenId}/edit`}
             className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
           >
@@ -139,21 +145,40 @@ export function GardenDetailClient({ garden }: { garden: Garden }) {
 
       {/* Beds list */}
       {garden.beds.length === 0 ? (
-        <div className="rounded-xl border-2 border-dashed border-gray-300 bg-white py-16 text-center">
-          <div className="mb-3 text-4xl">🛏</div>
-          <h2 className="mb-1 font-semibold text-gray-700">Inga odlingslådor än</h2>
-          <p className="mb-4 text-sm text-gray-500">
-            {layout && layout.beds.length > 0
-              ? 'Använd auto-genereringsknappen ovan, eller lägg till en låda manuellt.'
-              : 'Lägg till en låda för att börja planera.'}
-          </p>
-          <Link
-            href={`/gardens/${gardenId}/beds/new`}
-            className="rounded-md bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700"
-          >
-            Lägg till en låda manuellt
-          </Link>
-        </div>
+        <>
+          <div className="mb-4 rounded-xl border border-violet-200 bg-violet-50 p-5">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <h2 className="font-semibold text-violet-900">📅 Börja med försådd redan idag</h2>
+                <p className="mt-1 text-sm text-violet-800">
+                  Du behöver inte ha lagt upp lådorna ännu — schemat visar vad du kan så
+                  inomhus och planera för de närmaste 12 månaderna baserat på din sista frost.
+                </p>
+              </div>
+              <Link
+                href={`/gardens/${gardenId}/schedule`}
+                className="shrink-0 rounded-md bg-violet-600 px-4 py-2 text-sm font-semibold text-white hover:bg-violet-700"
+              >
+                Se mitt såschema →
+              </Link>
+            </div>
+          </div>
+          <div className="rounded-xl border-2 border-dashed border-gray-300 bg-white py-16 text-center">
+            <div className="mb-3 text-4xl">🛏</div>
+            <h2 className="mb-1 font-semibold text-gray-700">Inga odlingslådor än</h2>
+            <p className="mb-4 text-sm text-gray-500">
+              {layout && layout.beds.length > 0
+                ? 'Använd auto-genereringsknappen ovan, eller lägg till en låda manuellt.'
+                : 'Lägg till en låda för att börja planera.'}
+            </p>
+            <Link
+              href={`/gardens/${gardenId}/beds/new`}
+              className="rounded-md bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700"
+            >
+              Lägg till en låda manuellt
+            </Link>
+          </div>
+        </>
       ) : (
         <>
           <div className="grid gap-4 sm:grid-cols-2">
