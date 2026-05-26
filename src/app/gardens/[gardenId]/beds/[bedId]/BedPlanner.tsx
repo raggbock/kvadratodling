@@ -7,6 +7,7 @@ interface PalettePlant {
   slug: string;
   name: string;
   emoji: string;
+  plantsPerSqft: number;
 }
 
 interface SlotData {
@@ -23,23 +24,30 @@ interface BedPlannerProps {
   cols: number;
   initialSlots: SlotData[];
   palette: PalettePlant[];
+  companions: Record<string, { companions: string[]; antagonists: string[] }>;
 }
 
-export default function BedPlanner({ bedId, rows, cols, initialSlots, palette }: BedPlannerProps) {
+export default function BedPlanner({
+  bedId,
+  rows,
+  cols,
+  initialSlots,
+  palette,
+  companions,
+}: BedPlannerProps) {
   const [slots, setSlots] = useState<Map<string, SlotData>>(() => {
     const m = new Map<string, SlotData>();
     for (const s of initialSlots) m.set(`${s.row}:${s.col}`, s);
     return m;
   });
   const [selectedSlug, setSelectedSlug] = useState<string | null>(palette[0]?.slug ?? null);
-  // Cells with an in-flight save; rendered as a subtle ring rather than the
-  // jarring pulse-and-fade we had before (which is what felt laggy).
   const [pendingSaves, setPendingSaves] = useState<Set<string>>(new Set());
   const [search, setSearch] = useState('');
   const [savedAt, setSavedAt] = useState<number | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
 
-  const selectedPlant = palette.find((p) => p.slug === selectedSlug) ?? null;
+  const paletteBySlug = useMemo(() => new Map(palette.map((p) => [p.slug, p])), [palette]);
+  const selectedPlant = selectedSlug ? paletteBySlug.get(selectedSlug) ?? null : null;
 
   const filteredPlants = useMemo(() => {
     const q = search.toLowerCase();
@@ -62,7 +70,18 @@ export default function BedPlanner({ bedId, rows, cols, initialSlots, palette }:
     [cols],
   );
 
-  // Auto-fade the "Sparat ✓" badge after 2s so it doesn't linger as noise.
+  // Companion / antagonist chips for the selected plant. Filter out plants
+  // not in the palette (catalog drift) and resolve emoji/name.
+  const selectedNeighbours = useMemo(() => {
+    if (!selectedSlug) return { good: [], bad: [] };
+    const c = companions[selectedSlug] ?? { companions: [], antagonists: [] };
+    const resolve = (slug: string) => paletteBySlug.get(slug);
+    return {
+      good: c.companions.map(resolve).filter((p): p is PalettePlant => !!p),
+      bad: c.antagonists.map(resolve).filter((p): p is PalettePlant => !!p),
+    };
+  }, [selectedSlug, companions, paletteBySlug]);
+
   useEffect(() => {
     if (!savedAt) return;
     const id = setTimeout(() => setSavedAt(null), 2000);
@@ -72,12 +91,11 @@ export default function BedPlanner({ bedId, rows, cols, initialSlots, palette }:
   const handleCellClick = useCallback(
     (row: number, col: number) => {
       const key = `${row}:${col}`;
-      const previous = slots.get(key);  // snapshot for rollback
+      const previous = slots.get(key);
       const isSamePlant = previous?.plantSlug === selectedSlug;
       const newSlug = isSamePlant ? null : selectedSlug;
+      const plant = newSlug ? paletteBySlug.get(newSlug) : null;
 
-      // 1. Optimistic update — instant feedback, no waiting on the network.
-      const plant = newSlug ? palette.find((p) => p.slug === newSlug) : null;
       setSlots((prev) => {
         const next = new Map(prev);
         if (newSlug === null) next.delete(key);
@@ -88,7 +106,6 @@ export default function BedPlanner({ bedId, rows, cols, initialSlots, palette }:
         });
         return next;
       });
-
       setPendingSaves((prev) => {
         const next = new Set(prev);
         next.add(key);
@@ -96,7 +113,6 @@ export default function BedPlanner({ bedId, rows, cols, initialSlots, palette }:
       });
       setSaveError(null);
 
-      // 2. Persist in background.
       void (async () => {
         try {
           const res = await fetch(`/api/beds/${bedId}/slots`, {
@@ -113,7 +129,6 @@ export default function BedPlanner({ bedId, rows, cols, initialSlots, palette }:
           }
           setSavedAt(Date.now());
         } catch {
-          // Roll back the optimistic update.
           setSlots((prev) => {
             const next = new Map(prev);
             if (previous) next.set(key, previous);
@@ -130,7 +145,7 @@ export default function BedPlanner({ bedId, rows, cols, initialSlots, palette }:
         }
       })();
     },
-    [bedId, selectedSlug, slots, palette],
+    [bedId, selectedSlug, slots, paletteBySlug],
   );
 
   const filledCount = slots.size;
@@ -139,8 +154,8 @@ export default function BedPlanner({ bedId, rows, cols, initialSlots, palette }:
 
   return (
     <div className="flex flex-col gap-6 lg:flex-row">
-      {/* Plant palette */}
-      <aside className="w-full flex-shrink-0 lg:w-64">
+      {/* Plant palette + companion hints */}
+      <aside className="w-full flex-shrink-0 space-y-4 lg:w-64">
         <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
           <div className="border-b border-gray-100 px-4 py-3">
             <h2 className="text-sm font-semibold text-gray-700">Växtpalett</h2>
@@ -170,7 +185,7 @@ export default function BedPlanner({ bedId, rows, cols, initialSlots, palette }:
                   onChange={(e) => setSearch(e.target.value)}
                   className="mb-2 w-full rounded-md border border-gray-200 px-2 py-1.5 text-sm focus:border-green-400 focus:outline-none"
                 />
-                <ul className="max-h-[60vh] overflow-y-auto space-y-0.5">
+                <ul className="max-h-[50vh] overflow-y-auto space-y-0.5">
                   {filteredPlants.map((plant) => (
                     <li key={plant.slug}>
                       <button
@@ -183,6 +198,14 @@ export default function BedPlanner({ bedId, rows, cols, initialSlots, palette }:
                       >
                         <span className="text-base">{plant.emoji}</span>
                         <span className="flex-1">{plant.name}</span>
+                        {plant.plantsPerSqft >= 2 && (
+                          <span
+                            className="rounded-sm bg-gray-100 px-1 text-[10px] font-medium text-gray-500"
+                            title={`${plant.plantsPerSqft} plantor per ruta`}
+                          >
+                            ×{plant.plantsPerSqft}
+                          </span>
+                        )}
                       </button>
                     </li>
                   ))}
@@ -191,6 +214,68 @@ export default function BedPlanner({ bedId, rows, cols, initialSlots, palette }:
             )}
           </div>
         </div>
+
+        {/* Selected plant detail — per-ruta count + companions/antagonists */}
+        {selectedPlant && (
+          <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+            <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-500">
+              Vald växt
+            </p>
+            <p className="text-sm font-semibold text-gray-900">
+              {selectedPlant.emoji} {selectedPlant.name}
+            </p>
+            <p className="mt-0.5 text-xs text-gray-500">
+              {selectedPlant.plantsPerSqft >= 2
+                ? `${selectedPlant.plantsPerSqft} plantor per ruta — en klick = ${selectedPlant.plantsPerSqft} ${selectedPlant.name.toLowerCase()}`
+                : selectedPlant.plantsPerSqft === 1
+                  ? '1 planta per ruta'
+                  : `Behöver ${Math.round(1 / selectedPlant.plantsPerSqft)} rutor`}
+            </p>
+
+            {selectedNeighbours.good.length > 0 && (
+              <div className="mt-3">
+                <p className="mb-1.5 text-xs font-medium text-green-700">🤝 Bra grannar</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {selectedNeighbours.good.map((p) => (
+                    <button
+                      key={p.slug}
+                      onClick={() => setSelectedSlug(p.slug)}
+                      className="flex items-center gap-1 rounded-full border border-green-200 bg-green-50 px-2 py-0.5 text-xs text-green-800 transition hover:border-green-400 hover:bg-green-100"
+                      title={`Klicka för att välja ${p.name}`}
+                    >
+                      <span>{p.emoji}</span>
+                      <span>{p.name}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {selectedNeighbours.bad.length > 0 && (
+              <div className="mt-3">
+                <p className="mb-1.5 text-xs font-medium text-red-700">⚠️ Dåliga grannar</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {selectedNeighbours.bad.map((p) => (
+                    <span
+                      key={p.slug}
+                      className="flex items-center gap-1 rounded-full border border-red-200 bg-red-50 px-2 py-0.5 text-xs text-red-800"
+                      title={`Undvik att plantera bredvid ${p.name}`}
+                    >
+                      <span>{p.emoji}</span>
+                      <span>{p.name}</span>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {selectedNeighbours.good.length === 0 && selectedNeighbours.bad.length === 0 && (
+              <p className="mt-3 text-xs italic text-gray-400">
+                Ingen sällskapsdata för den här växten ännu.
+              </p>
+            )}
+          </div>
+        )}
       </aside>
 
       {/* Grid + stats */}
@@ -200,7 +285,6 @@ export default function BedPlanner({ bedId, rows, cols, initialSlots, palette }:
             {filledCount} / {total} rutor planterade
           </span>
           <div className="flex items-center gap-3">
-            {/* Save status — always visible so user understands changes auto-save */}
             <span aria-live="polite" className="text-xs">
               {isSaving ? (
                 <span className="text-gray-400">Sparar…</span>
@@ -243,14 +327,22 @@ export default function BedPlanner({ bedId, rows, cols, initialSlots, palette }:
               const slot = slots.get(key);
               const cellSaving = pendingSaves.has(key);
               const isCurrentPlant = slot?.plantSlug === selectedSlug;
+              const cellPlant = slot?.plantSlug ? paletteBySlug.get(slot.plantSlug) : null;
+              const perSquare = cellPlant?.plantsPerSqft ?? 0;
 
               return (
                 <button
                   key={key}
                   onClick={() => handleCellClick(r, c)}
-                  title={slot ? `${slot.plantName} — klicka för att ta bort` : selectedPlant ? `Plantera ${selectedPlant.name}` : 'Tom ruta'}
+                  title={
+                    slot
+                      ? `${slot.plantName}${perSquare >= 2 ? ` (×${perSquare})` : ''} — klicka för att ta bort`
+                      : selectedPlant
+                        ? `Plantera ${selectedPlant.name}${selectedPlant.plantsPerSqft >= 2 ? ` (×${selectedPlant.plantsPerSqft})` : ''}`
+                        : 'Tom ruta'
+                  }
                   className={`
-                    flex h-12 w-12 items-center justify-center rounded-lg border text-2xl transition select-none
+                    relative flex h-12 w-12 items-center justify-center rounded-lg border text-2xl transition select-none
                     sm:h-14 sm:w-14
                     ${cellSaving ? 'ring-1 ring-green-200' : ''}
                     ${slot
@@ -262,6 +354,11 @@ export default function BedPlanner({ bedId, rows, cols, initialSlots, palette }:
                   `}
                 >
                   {slot ? slot.plantEmoji : ''}
+                  {perSquare >= 2 && (
+                    <span className="pointer-events-none absolute -bottom-0.5 -right-0.5 rounded-bl-md rounded-tr-md bg-white/95 px-1 text-[9px] font-semibold leading-tight text-gray-600 shadow-sm">
+                      ×{perSquare}
+                    </span>
+                  )}
                 </button>
               );
             })
@@ -275,15 +372,27 @@ export default function BedPlanner({ bedId, rows, cols, initialSlots, palette }:
               Det här är planterat
             </h3>
             <div className="flex flex-wrap gap-2">
-              {legendItems.map((item) => (
-                <span
-                  key={item.slug}
-                  className="flex items-center gap-1 rounded-full bg-green-50 px-2.5 py-1 text-xs text-green-800"
-                >
-                  {item.emoji} {item.name}{' '}
-                  <span className="rounded-full bg-green-200 px-1.5 font-medium">{item.count}</span>
-                </span>
-              ))}
+              {legendItems.map((item) => {
+                const plant = paletteBySlug.get(item.slug);
+                const per = plant?.plantsPerSqft ?? 1;
+                const totalPlants = per >= 1 ? item.count * per : item.count;
+                return (
+                  <span
+                    key={item.slug}
+                    className="flex items-center gap-1 rounded-full bg-green-50 px-2.5 py-1 text-xs text-green-800"
+                    title={
+                      per >= 2
+                        ? `${item.count} rutor × ${per} = ${totalPlants} ${item.name?.toLowerCase()}`
+                        : undefined
+                    }
+                  >
+                    {item.emoji} {item.name}{' '}
+                    <span className="rounded-full bg-green-200 px-1.5 font-medium">
+                      {per >= 2 ? `${item.count}r · ${totalPlants}` : item.count}
+                    </span>
+                  </span>
+                );
+              })}
             </div>
           </div>
         )}

@@ -27,7 +27,7 @@ export default async function BedPage({
 
   const { data: dbPlants } = await supabase
     .from('plants')
-    .select('slug, common_name, emoji')
+    .select('slug, common_name, emoji, plants_per_sqft')
     .eq('is_active', true)
     .order('common_name');
 
@@ -35,7 +35,45 @@ export default async function BedPage({
     slug: p.slug,
     name: p.common_name,
     emoji: p.emoji,
+    plantsPerSqft: Number(p.plants_per_sqft),
   }));
+
+  // Companions/antagonists for the whole catalog. ~1000 rows total; we resolve
+  // both FKs to slug here so the client can do all lookups by slug, and we
+  // materialise the relation symmetrically — the planner doesn't care which
+  // way the row happens to be stored.
+  const { data: compat } = await supabase
+    .from('plant_compatibility')
+    .select(
+      'relationship, plant:plants!plant_compatibility_plant_id_fkey(slug), other:plants!plant_compatibility_other_plant_id_fkey(slug)',
+    );
+
+  type CompatRow = {
+    relationship: 'companion' | 'antagonist';
+    plant: { slug: string } | null;
+    other: { slug: string } | null;
+  };
+
+  const companionMap: Record<string, { companions: string[]; antagonists: string[] }> = {};
+  const ensureEntry = (slug: string) => {
+    if (!companionMap[slug]) companionMap[slug] = { companions: [], antagonists: [] };
+    return companionMap[slug];
+  };
+  const seen = new Set<string>(); // dedup symmetric inserts
+  for (const row of (compat ?? []) as unknown as CompatRow[]) {
+    if (!row.plant || !row.other) continue;
+    const pairs: [string, string][] = [
+      [row.plant.slug, row.other.slug],
+      [row.other.slug, row.plant.slug],
+    ];
+    for (const [a, b] of pairs) {
+      const key = `${a}|${row.relationship}|${b}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      const bucket = row.relationship === 'companion' ? 'companions' : 'antagonists';
+      ensureEntry(a)[bucket].push(b);
+    }
+  }
 
   const slots = bed.planting_slots as unknown as {
     row: number;
@@ -93,6 +131,7 @@ export default async function BedPage({
         cols={bed.cols}
         initialSlots={initialSlots}
         palette={palette}
+        companions={companionMap}
       />
     </div>
   );
