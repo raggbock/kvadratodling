@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { track } from '@/lib/analytics';
 
 interface PalettePlant {
@@ -28,14 +28,16 @@ interface BedPlannerProps {
 export default function BedPlanner({ bedId, rows, cols, initialSlots, palette }: BedPlannerProps) {
   const [slots, setSlots] = useState<Map<string, SlotData>>(() => {
     const m = new Map<string, SlotData>();
-    for (const s of initialSlots) {
-      m.set(`${s.row}:${s.col}`, s);
-    }
+    for (const s of initialSlots) m.set(`${s.row}:${s.col}`, s);
     return m;
   });
   const [selectedSlug, setSelectedSlug] = useState<string | null>(palette[0]?.slug ?? null);
-  const [saving, setSaving] = useState<string | null>(null);
+  // Cells with an in-flight save; rendered as a subtle ring rather than the
+  // jarring pulse-and-fade we had before (which is what felt laggy).
+  const [pendingSaves, setPendingSaves] = useState<Set<string>>(new Set());
   const [search, setSearch] = useState('');
+  const [savedAt, setSavedAt] = useState<number | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const selectedPlant = palette.find((p) => p.slug === selectedSlug) ?? null;
 
@@ -44,7 +46,6 @@ export default function BedPlanner({ bedId, rows, cols, initialSlots, palette }:
     return q ? palette.filter((p) => p.name.toLowerCase().includes(q)) : palette;
   }, [palette, search]);
 
-  // One O(n) pass instead of an O(n²) filter-per-unique-plant in the legend below.
   const legendItems = useMemo(() => {
     const counts = new Map<string, { emoji: string | null; name: string | null; count: number }>();
     for (const slot of slots.values()) {
@@ -61,56 +62,80 @@ export default function BedPlanner({ bedId, rows, cols, initialSlots, palette }:
     [cols],
   );
 
+  // Auto-fade the "Sparat ✓" badge after 2s so it doesn't linger as noise.
+  useEffect(() => {
+    if (!savedAt) return;
+    const id = setTimeout(() => setSavedAt(null), 2000);
+    return () => clearTimeout(id);
+  }, [savedAt]);
+
   const handleCellClick = useCallback(
-    async (row: number, col: number) => {
+    (row: number, col: number) => {
       const key = `${row}:${col}`;
-      const existing = slots.get(key);
-      const isSamePlant = existing?.plantSlug === selectedSlug;
+      const previous = slots.get(key);  // snapshot for rollback
+      const isSamePlant = previous?.plantSlug === selectedSlug;
       const newSlug = isSamePlant ? null : selectedSlug;
 
-      setSaving(key);
-
-      try {
-        const res = await fetch(`/api/beds/${bedId}/slots`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ row, col, plantSlug: newSlug }),
+      // 1. Optimistic update — instant feedback, no waiting on the network.
+      const plant = newSlug ? palette.find((p) => p.slug === newSlug) : null;
+      setSlots((prev) => {
+        const next = new Map(prev);
+        if (newSlug === null) next.delete(key);
+        else next.set(key, {
+          row, col, plantSlug: newSlug,
+          plantEmoji: plant?.emoji ?? null,
+          plantName: plant?.name ?? null,
         });
-        if (!res.ok) throw new Error('Save failed');
+        return next;
+      });
 
-        if (newSlug === null) {
-          track({ name: 'plant_removed', properties: { bed_id: bedId, row, col } });
-        } else {
-          track({ name: 'plant_added', properties: { plant_slug: newSlug, bed_id: bedId, row, col } });
-        }
+      setPendingSaves((prev) => {
+        const next = new Set(prev);
+        next.add(key);
+        return next;
+      });
+      setSaveError(null);
 
-        setSlots((prev) => {
-          const next = new Map(prev);
+      // 2. Persist in background.
+      void (async () => {
+        try {
+          const res = await fetch(`/api/beds/${bedId}/slots`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ row, col, plantSlug: newSlug }),
+          });
+          if (!res.ok) throw new Error('Save failed');
+
           if (newSlug === null) {
-            next.delete(key);
+            track({ name: 'plant_removed', properties: { bed_id: bedId, row, col } });
           } else {
-            const plant = palette.find((p) => p.slug === newSlug);
-            next.set(key, {
-              row,
-              col,
-              plantSlug: newSlug,
-              plantEmoji: plant?.emoji ?? null,
-              plantName: plant?.name ?? null,
-            });
+            track({ name: 'plant_added', properties: { plant_slug: newSlug, bed_id: bedId, row, col } });
           }
-          return next;
-        });
-      } catch {
-        // slot stays as-is on error
-      } finally {
-        setSaving(null);
-      }
+          setSavedAt(Date.now());
+        } catch {
+          // Roll back the optimistic update.
+          setSlots((prev) => {
+            const next = new Map(prev);
+            if (previous) next.set(key, previous);
+            else next.delete(key);
+            return next;
+          });
+          setSaveError('Kunde inte spara — kontrollera att du är online och försök igen.');
+        } finally {
+          setPendingSaves((prev) => {
+            const next = new Set(prev);
+            next.delete(key);
+            return next;
+          });
+        }
+      })();
     },
-    [bedId, selectedSlug, slots, palette]
+    [bedId, selectedSlug, slots, palette],
   );
 
   const filledCount = slots.size;
   const total = rows * cols;
+  const isSaving = pendingSaves.size > 0;
 
   return (
     <div className="flex flex-col gap-6 lg:flex-row">
@@ -170,25 +195,43 @@ export default function BedPlanner({ bedId, rows, cols, initialSlots, palette }:
 
       {/* Grid + stats */}
       <div className="flex-1">
-        <div className="mb-3 flex items-center justify-between text-sm text-gray-500">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2 text-sm text-gray-500">
           <span>
             {filledCount} / {total} rutor planterade
           </span>
-          <span>
-            {palette.length === 0 ? (
-              <span className="text-amber-600">Välj först en växt i katalogen</span>
-            ) : selectedPlant ? (
-              <>
-                Planterar{' '}
-                <strong className="text-gray-700">
-                  {selectedPlant.emoji} {selectedPlant.name}
-                </strong>
-              </>
-            ) : (
-              <strong className="text-red-600">Raderingsläge</strong>
-            )}
-          </span>
+          <div className="flex items-center gap-3">
+            {/* Save status — always visible so user understands changes auto-save */}
+            <span aria-live="polite" className="text-xs">
+              {isSaving ? (
+                <span className="text-gray-400">Sparar…</span>
+              ) : savedAt ? (
+                <span className="text-green-700">Sparat ✓</span>
+              ) : (
+                <span className="text-gray-300">Sparas automatiskt</span>
+              )}
+            </span>
+            <span>
+              {palette.length === 0 ? (
+                <span className="text-amber-600">Välj först en växt i katalogen</span>
+              ) : selectedPlant ? (
+                <>
+                  Planterar{' '}
+                  <strong className="text-gray-700">
+                    {selectedPlant.emoji} {selectedPlant.name}
+                  </strong>
+                </>
+              ) : (
+                <strong className="text-red-600">Raderingsläge</strong>
+              )}
+            </span>
+          </div>
         </div>
+
+        {saveError && (
+          <div className="mb-3 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
+            {saveError}
+          </div>
+        )}
 
         <div
           className="inline-grid gap-1 rounded-xl border border-gray-200 bg-white p-3 shadow-sm"
@@ -198,7 +241,7 @@ export default function BedPlanner({ bedId, rows, cols, initialSlots, palette }:
             Array.from({ length: cols }, (_, c) => {
               const key = `${r}:${c}`;
               const slot = slots.get(key);
-              const isSaving = saving === key;
+              const cellSaving = pendingSaves.has(key);
               const isCurrentPlant = slot?.plantSlug === selectedSlug;
 
               return (
@@ -209,7 +252,7 @@ export default function BedPlanner({ bedId, rows, cols, initialSlots, palette }:
                   className={`
                     flex h-12 w-12 items-center justify-center rounded-lg border text-2xl transition select-none
                     sm:h-14 sm:w-14
-                    ${isSaving ? 'animate-pulse opacity-60' : ''}
+                    ${cellSaving ? 'ring-1 ring-green-200' : ''}
                     ${slot
                       ? isCurrentPlant
                         ? 'border-green-400 bg-green-50 ring-2 ring-green-300 hover:bg-red-50 hover:ring-red-200'
