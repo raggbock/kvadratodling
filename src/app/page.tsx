@@ -1,9 +1,33 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import { JsonLd } from '@/components/JsonLd';
+import { SITE_URL, SITE_NAME, SITE_DESCRIPTION } from '@/lib/site';
 
 export default function Home() {
+  const orgSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: SITE_NAME,
+    url: SITE_URL,
+    logo: `${SITE_URL}/assets/logo-grodden.svg`,
+    description: SITE_DESCRIPTION,
+  };
+  const siteSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: SITE_NAME,
+    url: SITE_URL,
+    inLanguage: 'sv-SE',
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: `${SITE_URL}/catalog?q={search_term_string}`,
+      'query-input': 'required name=search_term_string',
+    },
+  };
+
   return (
     <div>
+      <JsonLd data={[orgSchema, siteSchema]} />
       {/* Hero */}
       <section
         className="relative overflow-hidden px-4 pb-20 pt-20 text-center sm:pt-28"

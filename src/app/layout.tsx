@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { PostHogProvider } from '@/components/PostHogProvider';
 import { SignOutButton } from '@/components/SignOutButton';
+import { SITE_URL, SITE_NAME, SITE_TAGLINE, SITE_DESCRIPTION, SITE_LOCALE, DEFAULT_OG_IMAGE } from '@/lib/site';
 import './globals.css';
 
 const familjenGrotesk = Familjen_Grotesk({
@@ -11,9 +12,48 @@ const familjenGrotesk = Familjen_Grotesk({
   variable: '--font-familjen-grotesk',
 });
 
+// metadataBase lets per-page metadata use relative OG URLs and Next resolves
+// them against the canonical origin. Title template adds "| Kvadratodling"
+// only when a child page sets its own title (homepage uses default).
 export const metadata: Metadata = {
-  title: 'Kvadratodling — Planera din pallkrage',
-  description: 'Planera din pallkrage kvadrat för kvadrat. 25 växter, sällskapsplantering och odlingsschema som följer din sista frost.',
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: `${SITE_NAME} — ${SITE_TAGLINE}`,
+    template: `%s | ${SITE_NAME}`,
+  },
+  description: SITE_DESCRIPTION,
+  applicationName: SITE_NAME,
+  authors: [{ name: SITE_NAME }],
+  keywords: [
+    'pallkrage', 'kvadratodling', 'square foot gardening',
+    'sällskapsplantering', 'odlingsschema', 'växtzoner sverige',
+    'hobbyodling', 'köksträdgård', 'odla själv',
+  ],
+  alternates: { canonical: '/' },
+  openGraph: {
+    type: 'website',
+    siteName: SITE_NAME,
+    title: `${SITE_NAME} — ${SITE_TAGLINE}`,
+    description: SITE_DESCRIPTION,
+    locale: SITE_LOCALE,
+    url: SITE_URL,
+    images: [{ url: DEFAULT_OG_IMAGE, width: 1200, height: 630, alt: SITE_NAME }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: `${SITE_NAME} — ${SITE_TAGLINE}`,
+    description: SITE_DESCRIPTION,
+    images: [DEFAULT_OG_IMAGE],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1 },
+  },
+  icons: {
+    icon: '/assets/logo-grodden-32.svg',
+    apple: '/assets/logo-grodden-32.svg',
+  },
 };
 
 async function getUser() {

@@ -11,6 +11,32 @@ import {
   formatDaysToHarvest,
 } from '@/lib/plant-display';
 import { CompanionHint } from '@/components/CompanionHint';
+import { JsonLd } from '@/components/JsonLd';
+import { SITE_URL, SITE_NAME, DEFAULT_OG_IMAGE } from '@/lib/site';
+
+// Build a meta description even when plant.description is empty — derived
+// from structured fields so Google has something better than the title.
+function deriveDescription(p: {
+  common_name: string;
+  description: string | null;
+  plants_per_sqft: number;
+  sun_requirement: 'full_sun' | 'part_shade' | 'full_shade';
+  water_need: 'low' | 'medium' | 'high';
+  zones_min: string | null;
+  zones_max: string | null;
+  days_to_maturity_min: number | null;
+  days_to_maturity_max: number | null;
+}): string {
+  if (p.description && p.description.length >= 60) return p.description.slice(0, 300);
+  const bits: string[] = [`Odla ${p.common_name.toLowerCase()} i pallkrage på svensk vis.`];
+  if (p.plants_per_sqft >= 2) bits.push(`${p.plants_per_sqft} plantor per ruta`);
+  else if (p.plants_per_sqft < 1) bits.push(`Behöver ${Math.round(1 / p.plants_per_sqft)} rutor per planta`);
+  bits.push(`${SUN_LABELS[p.sun_requirement].toLowerCase()}`);
+  bits.push(`${WATER_LABELS[p.water_need].toLowerCase()} vattenbehov`);
+  if (p.zones_min) bits.push(`zoner ${p.zones_min}${p.zones_max && p.zones_max !== p.zones_min ? `–${p.zones_max}` : ''}`);
+  if (p.days_to_maturity_min) bits.push(`skördas på ${p.days_to_maturity_min}${p.days_to_maturity_max && p.days_to_maturity_max !== p.days_to_maturity_min ? `–${p.days_to_maturity_max}` : ''} dagar`);
+  return bits.join(' · ');
+}
 
 // Catalog data is public + slow-moving — let Next.js cache the page for an hour.
 export const revalidate = 3600;
@@ -37,9 +63,40 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const plant = await getPlant(slug);
   if (!plant) return {};
+  const description = deriveDescription(plant);
+  const titleParts = [plant.common_name];
+  if (plant.english_name && plant.english_name !== plant.common_name) {
+    titleParts.push(`(${plant.english_name})`);
+  }
+  titleParts.push('— odla i pallkrage');
+  const title = titleParts.join(' ');
+  const url = `${SITE_URL}/catalog/${slug}`;
+
   return {
-    title: `${plant.common_name} | Kvadratodling`,
-    description: plant.description ?? undefined,
+    title,
+    description,
+    alternates: { canonical: `/catalog/${slug}` },
+    openGraph: {
+      title: `${plant.emoji} ${plant.common_name} — ${SITE_NAME}`,
+      description,
+      url,
+      type: 'article',
+      images: [DEFAULT_OG_IMAGE],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${plant.emoji} ${plant.common_name}`,
+      description,
+    },
+    keywords: [
+      plant.common_name.toLowerCase(),
+      plant.english_name?.toLowerCase(),
+      plant.scientific_name?.toLowerCase(),
+      `odla ${plant.common_name.toLowerCase()}`,
+      `${plant.common_name.toLowerCase()} pallkrage`,
+      `när så ${plant.common_name.toLowerCase()}`,
+      ...(plant.tags ?? []),
+    ].filter(Boolean) as string[],
   };
 }
 
@@ -71,9 +128,44 @@ export default async function PlantDetailPage({ params }: Props) {
   const subtitle = [plant.english_name, plant.scientific_name, plant.family]
     .filter(Boolean)
     .join(' · ');
+  const description = deriveDescription(plant);
+  const url = `${SITE_URL}/catalog/${slug}`;
+
+  // Article schema — Google's closest fit for "informational guide page".
+  // We tag it as Article (not Product, which would imply for-sale).
+  const articleSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: `${plant.common_name} — odla i pallkrage`,
+    description,
+    url,
+    inLanguage: 'sv-SE',
+    isPartOf: { '@type': 'WebSite', name: SITE_NAME, url: SITE_URL },
+    author: { '@type': 'Organization', name: SITE_NAME, url: SITE_URL },
+    publisher: {
+      '@type': 'Organization',
+      name: SITE_NAME,
+      logo: { '@type': 'ImageObject', url: `${SITE_URL}/assets/logo-grodden.svg` },
+    },
+    about: {
+      '@type': 'Thing',
+      name: plant.common_name,
+      alternateName: [plant.english_name, plant.scientific_name].filter(Boolean),
+    },
+  };
+  const breadcrumb = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Hem', item: SITE_URL },
+      { '@type': 'ListItem', position: 2, name: 'Växtkatalog', item: `${SITE_URL}/catalog` },
+      { '@type': 'ListItem', position: 3, name: plant.common_name, item: url },
+    ],
+  };
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
+      <JsonLd data={[articleSchema, breadcrumb]} />
       <Link
         href="/catalog"
         className="mb-6 inline-flex items-center gap-1 text-sm text-green-600 hover:text-green-700"
