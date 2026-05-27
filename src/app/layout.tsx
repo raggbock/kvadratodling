@@ -158,8 +158,13 @@ export default async function RootLayout({
                   <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted">Guider</h3>
                   <ul className="mt-3 space-y-2 text-sm text-text-subtle">
                     <li><Link href="/pallkrage" className="hover:text-brand-default">Pallkrage</Link></li>
+                    <li><Link href="/forsadd" className="hover:text-brand-default">Försådd inomhus</Link></li>
                     <li><Link href="/sallskapsplantering" className="hover:text-brand-default">Sällskapsplantering</Link></li>
                     <li><Link href="/odlingszoner" className="hover:text-brand-default">Odlingszoner</Link></li>
+                    <li><Link href="/odla-manadsvis" className="hover:text-brand-default">Månadsvis</Link></li>
+                    <li><Link href="/balkongodling" className="hover:text-brand-default">Balkongodling</Link></li>
+                    <li><Link href="/jord-till-pallkrage" className="hover:text-brand-default">Jord till pallkrage</Link></li>
+                    <li><Link href="/skordetider" className="hover:text-brand-default">Skördetider</Link></li>
                   </ul>
                 </div>
                 <div>

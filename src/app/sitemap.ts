@@ -16,6 +16,12 @@ const STATIC_PATHS: Array<{ path: string; priority: number; changeFrequency: Met
   { path: '/sallskapsplantering',         priority: 0.8, changeFrequency: 'monthly' },
   { path: '/odlingszoner',                priority: 0.8, changeFrequency: 'monthly' },
   { path: '/odlingsschema',               priority: 0.8, changeFrequency: 'weekly' },
+  { path: '/forsadd',                     priority: 0.8, changeFrequency: 'monthly' },
+  { path: '/odla-manadsvis',              priority: 0.8, changeFrequency: 'monthly' },
+  { path: '/balkongodling',               priority: 0.7, changeFrequency: 'monthly' },
+  { path: '/jord-till-pallkrage',         priority: 0.7, changeFrequency: 'monthly' },
+  { path: '/skordetider',                 priority: 0.7, changeFrequency: 'monthly' },
+  { path: '/verktyg',                     priority: 0.6, changeFrequency: 'monthly' },
   { path: '/verktyg/frostkalkylator',     priority: 0.7, changeFrequency: 'monthly' },
 ];
 
