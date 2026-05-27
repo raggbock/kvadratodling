@@ -8,6 +8,23 @@ nya keywords som funkar.
 Bli **förstavalet på svenska för pallkrage-planering**. Sekundärt: dra in
 trafik på generella "när så X"-frågor som leder till produkten.
 
+## Status (uppdaterad 2026-05-27)
+
+| Område | Klart | Kvar |
+|---|---|---|
+| Teknisk SEO | sitemap, robots, OG, JSON-LD, canonical, derived descriptions | — |
+| Dynamiska OG-bilder | site-default + per-växt | — |
+| Hub-sidor | /pallkrage, /sallskapsplantering, /odlingszoner | — |
+| Publika verktyg | /verktyg, /verktyg/frostkalkylator, /odlingsschema, /odlingsschema/[zon] för alla 8 zoner | — |
+| Pinterest pins | /presets/[id]/pin (1000×1500 per preset) | Aktivt pinna till Pinterest-konto |
+| Långa växtbeskrivningar | 42 av 108 (39 %) | 66 (lågt prio, avtagande SEO-värde per planta) |
+
+**Beslut om resterande växter:** De kvarvarande ~66 växterna har redan 100–200
+tecken kort text (importerad från Cowork tidigare). Att autogenerera "filler"
+från strukturerad data riskerar mer än det vinner — Google penaliserar
+template-y innehåll. Bättre att lämna dem korta och autentiska. Vi kan skriva
+fler manuellt vid behov (en växt = ~5 min för en domänkunnig människa).
+
 ## Tekniska grundbultar (fas 1 — klar)
 
 - [x] **Dynamisk `/sitemap.xml`** — alla 108 publika växtsidor + `/`, `/catalog`. Revalidate 3600s.

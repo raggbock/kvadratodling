@@ -166,7 +166,8 @@ export default async function RootLayout({
                   <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted">Verktyg</h3>
                   <ul className="mt-3 space-y-2 text-sm text-text-subtle">
                     <li><Link href="/catalog" className="hover:text-brand-default">Växtkatalog</Link></li>
-                    <li><Link href="/gardens/demo/schedule" className="hover:text-brand-default">Demo-schema</Link></li>
+                    <li><Link href="/odlingsschema" className="hover:text-brand-default">Odlingsschema</Link></li>
+                    <li><Link href="/verktyg/frostkalkylator" className="hover:text-brand-default">Frostkalkylator</Link></li>
                     <li><Link href="/gardens/new" className="hover:text-brand-default">Skapa odling</Link></li>
                   </ul>
                 </div>
