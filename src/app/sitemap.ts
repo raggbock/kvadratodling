@@ -9,8 +9,11 @@ import { SITE_URL } from '@/lib/site';
 export const revalidate = 3600;
 
 const STATIC_PATHS: Array<{ path: string; priority: number; changeFrequency: MetadataRoute.Sitemap[number]['changeFrequency'] }> = [
-  { path: '/',         priority: 1.0, changeFrequency: 'weekly' },
-  { path: '/catalog',  priority: 0.9, changeFrequency: 'weekly' },
+  { path: '/',                     priority: 1.0, changeFrequency: 'weekly' },
+  { path: '/catalog',              priority: 0.9, changeFrequency: 'weekly' },
+  { path: '/pallkrage',            priority: 0.8, changeFrequency: 'monthly' },
+  { path: '/sallskapsplantering',  priority: 0.8, changeFrequency: 'monthly' },
+  { path: '/odlingszoner',         priority: 0.8, changeFrequency: 'monthly' },
 ];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

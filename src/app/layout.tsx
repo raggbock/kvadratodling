@@ -142,8 +142,55 @@ export default async function RootLayout({
             </div>
           </header>
           <main className="flex-1">{children}</main>
-          <footer className="border-t border-border-subtle py-6 text-center text-xs text-text-muted">
-            Kvadratodling — planera din pallkrage kvadrat för kvadrat
+          <footer className="border-t border-border-subtle bg-white">
+            <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+              <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+                <div>
+                  <div className="flex items-center gap-2 text-sm font-semibold text-text-default">
+                    <Image src="/assets/logo-grodden-32.svg" alt="" width={20} height={20} />
+                    Kvadratodling
+                  </div>
+                  <p className="mt-2 text-xs leading-relaxed text-text-muted">
+                    Planera din pallkrage kvadrat för kvadrat — för svenska klimatet.
+                  </p>
+                </div>
+                <div>
+                  <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted">Guider</h3>
+                  <ul className="mt-3 space-y-2 text-sm text-text-subtle">
+                    <li><Link href="/pallkrage" className="hover:text-brand-default">Pallkrage</Link></li>
+                    <li><Link href="/sallskapsplantering" className="hover:text-brand-default">Sällskapsplantering</Link></li>
+                    <li><Link href="/odlingszoner" className="hover:text-brand-default">Odlingszoner</Link></li>
+                  </ul>
+                </div>
+                <div>
+                  <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted">Verktyg</h3>
+                  <ul className="mt-3 space-y-2 text-sm text-text-subtle">
+                    <li><Link href="/catalog" className="hover:text-brand-default">Växtkatalog</Link></li>
+                    <li><Link href="/gardens/demo/schedule" className="hover:text-brand-default">Demo-schema</Link></li>
+                    <li><Link href="/gardens/new" className="hover:text-brand-default">Skapa odling</Link></li>
+                  </ul>
+                </div>
+                <div>
+                  <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted">Konto</h3>
+                  <ul className="mt-3 space-y-2 text-sm text-text-subtle">
+                    {user ? (
+                      <>
+                        <li><Link href="/gardens" className="hover:text-brand-default">Mina odlingar</Link></li>
+                        <li><Link href="/settings" className="hover:text-brand-default">Inställningar</Link></li>
+                      </>
+                    ) : (
+                      <>
+                        <li><Link href="/auth/login" className="hover:text-brand-default">Logga in</Link></li>
+                        <li><Link href="/auth/signup" className="hover:text-brand-default">Skapa konto</Link></li>
+                      </>
+                    )}
+                  </ul>
+                </div>
+              </div>
+              <div className="mt-8 border-t border-border-subtle pt-6 text-center text-xs text-text-muted">
+                © {new Date().getFullYear()} Kvadratodling — planera din pallkrage kvadrat för kvadrat
+              </div>
+            </div>
           </footer>
         </PostHogProvider>
       </body>
