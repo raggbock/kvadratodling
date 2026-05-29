@@ -1,0 +1,57 @@
+[
+  {
+    "slug": "onion",
+    "commonName": "Lök",
+    "fields": [
+      {
+        "field": "description",
+        "proposedValue": "Lök sätts från sättlök på våren när risken för kalla väderomslag är över, och växer bäst i ett varmt läge med god tillgång till vatten i lucker, näringsrik jord.",
+        "currentValue": null,
+        "sourceUrl": "https://dinodlarvan.nelsongarden.se/odla-din-egen-mat/odla-lok-med-fantastisk-smak/",
+        "quote": "sätta löken så fort risken för kalla väderomslag är över … växer den som allra bäst … om den får växa i ett varmt läge med tillgång till vatten och i lucker och näringsrik jord",
+        "confidence": "medium",
+        "flagged": false,
+        "note": "Syntetiserad enbart ur Nelson Gardens odlingsbeskrivning — inga nya fakta."
+      },
+      {
+        "field": "tips",
+        "proposedValue": "Sätt löken först när risken för kalla väderomslag är över, ge den ett varmt läge och näring regelbundet under sommaren.",
+        "currentValue": null,
+        "sourceUrl": "https://dinodlarvan.nelsongarden.se/odla-din-egen-mat/odla-lok-med-fantastisk-smak/",
+        "quote": "Glöm inte att ge näring regelbundet under sommaren",
+        "confidence": "medium",
+        "flagged": false
+      },
+      {
+        "field": "diseases",
+        "proposedValue": ["Lökbladmögel"],
+        "currentValue": [],
+        "sourceUrl": "https://webbutiken.jordbruksverket.se/sv/artiklar/ovr326.html",
+        "quote": "Angrepp av lökbladmögel, Peronospora destruktor, kan ge stora skördesänkningar i lök.",
+        "confidence": "high",
+        "flagged": false,
+        "note": "Verbatim-citat hämtat från Jordbruksverket."
+      },
+      {
+        "field": "pests",
+        "proposedValue": ["Lökfluga"],
+        "currentValue": [],
+        "sourceUrl": "https://pub.epsilon.slu.se/18109/1/Andersson_G_201105.pdf",
+        "quote": null,
+        "confidence": "medium",
+        "flagged": true,
+        "note": "SLU/Jordbruksverket pekar ut lökfluga (Delia antiqua) som klassisk skadegörare på lök, men källan är en PDF som inte gick att extrahera verbatim ur. Bekräfta citatet innan import — inget värde uppfinns."
+      },
+      {
+        "field": "zones",
+        "proposedValue": null,
+        "currentValue": null,
+        "sourceUrl": null,
+        "quote": null,
+        "confidence": "low",
+        "flagged": true,
+        "note": "Lök är en ettårig grönsak; Svensk Trädgårds zonsystem gäller fleråriga/vedartade växter. Ingen auktoritativ 'lök zon 1–8'-källa hittad. Rekommendation: lämna null eller inför en sajtkonvention för ettåriga grönsaker — uppfinn ingen zon."
+      }
+    ]
+  }
+]
