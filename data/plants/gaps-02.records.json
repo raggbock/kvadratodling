@@ -1,0 +1,92 @@
+[
+  {
+    "slug": "honungsort",
+    "commonName": "Honungsört",
+    "fields": [
+      {
+        "field": "pests",
+        "proposedValue": null,
+        "currentValue": [],
+        "sourceUrl": "https://www.impecta.se/froer/nyttovaxter/honungsfacelia",
+        "quote": null,
+        "confidence": "low",
+        "flagged": true,
+        "note": "Inga specifika skadegörare dokumenterade i godkända källor. Honungsört (Phacelia) odlas som gröngödsling/pollinatörsväxt och är lågunderhåll. Rekommendation: lämna null — uppfinn ingen skadegörare."
+      },
+      {
+        "field": "diseases",
+        "proposedValue": null,
+        "currentValue": [],
+        "sourceUrl": "https://www.impecta.se/froer/nyttovaxter/honungsfacelia",
+        "quote": null,
+        "confidence": "low",
+        "flagged": true,
+        "note": "Inga specifika sjukdomar dokumenterade i godkända källor. Rekommendation: lämna null."
+      }
+    ]
+  },
+  {
+    "slug": "portlak",
+    "commonName": "Portlak",
+    "fields": [
+      {
+        "field": "diseases",
+        "proposedValue": null,
+        "currentValue": [],
+        "sourceUrl": null,
+        "quote": null,
+        "confidence": "low",
+        "flagged": true,
+        "note": "Inga specifika sjukdomar för portlak hittades i godkända källor. Portlak är en tålig ettåring. Rekommendation: lämna null — uppfinn ingen sjukdom."
+      }
+    ]
+  },
+  {
+    "slug": "skogslok",
+    "commonName": "Ramslök",
+    "fields": [
+      {
+        "field": "pests",
+        "proposedValue": null,
+        "currentValue": [],
+        "sourceUrl": "https://www.impecta.se/sv/jordnara/odla-ramslok-skogens-vitlok",
+        "quote": null,
+        "confidence": "low",
+        "flagged": true,
+        "note": "Godkända källor namnger inga specifika skadegörare; ramslök beskrivs som en relativt problemfri skuggväxt. Rekommendation: lämna null."
+      }
+    ]
+  },
+  {
+    "slug": "malort",
+    "commonName": "Malört",
+    "fields": [
+      {
+        "field": "pests",
+        "proposedValue": null,
+        "currentValue": [],
+        "sourceUrl": "https://www.runabergsfroer.se/?m=272",
+        "quote": null,
+        "confidence": "low",
+        "flagged": true,
+        "note": "Inga specifika skadegörare dokumenterade i godkända källor. Malört är starkt aromatisk/bitter och traditionellt skadegörar-avvisande. Rekommendation: lämna null."
+      }
+    ]
+  },
+  {
+    "slug": "vitlok",
+    "commonName": "Vitlök",
+    "fields": [
+      {
+        "field": "sowing",
+        "proposedValue": null,
+        "currentValue": null,
+        "sourceUrl": "https://www.impecta.se/sv/jordnara/odla-vitlok-guide-for-plantering-och-skord",
+        "quote": "Klyftorna sätts på senhösten när jorden är kall, men inte tjälad, med riktmärket september i norra landet och november längst i söder.",
+        "confidence": "low",
+        "flagged": true,
+        "note": "SCHEMAFEL: vitlök sätts som klyftor på HÖSTEN och skördas sommaren därpå. Schemats såfält (sow_indoors/direct_sow/transplant_*_frost) är alla relativa sista VÅRFROST och kan inte representera höstsättning sanningsenligt. Rekommendation: lämna såfälten null och beskriv höstsättning i prosatext (description/tips) — ELLER utöka schemat med stöd för höstsatta grödor. Uppfinn inget vårfrost-offset."
+      }
+    ]
+  }
+]
