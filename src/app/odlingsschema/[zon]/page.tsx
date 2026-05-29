@@ -15,6 +15,7 @@ const KIND_LABELS: Record<ScheduleEventKind, string> = {
   sow_indoors: 'Så inomhus',
   direct_sow: 'Så utomhus',
   transplant: 'Plantera ut',
+  plant_autumn: 'Sätt på hösten',
   harvest_start: 'Börja skörda',
   harvest_end: 'Sista skörd',
 };

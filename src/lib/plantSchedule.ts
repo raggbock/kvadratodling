@@ -2,6 +2,7 @@ export type ScheduleEventKind =
   | "sow_indoors"
   | "direct_sow"
   | "transplant"
+  | "plant_autumn"
   | "harvest_start"
   | "harvest_end";
 
@@ -21,6 +22,7 @@ export interface PlantScheduleInput {
   sowIndoorsDaysBeforeFrost: number | null;
   directSowDaysBeforeFrost: number | null;
   transplantDaysAfterFrost: number | null;
+  autumnPlantDaysBeforeFirstFrost?: number | null;
   daysToMaturityMin: number | null;
   daysToMaturityMax: number | null;
 }
@@ -33,7 +35,8 @@ function addDays(base: Date, days: number): Date {
 
 export function computeSchedule(
   lastFrostDate: Date,
-  plants: PlantScheduleInput[]
+  plants: PlantScheduleInput[],
+  firstFrostDate?: Date
 ): ScheduleEvent[] {
   const events: ScheduleEvent[] = [];
 
@@ -43,6 +46,18 @@ export function computeSchedule(
       plantName: plant.commonName,
       emoji: plant.emoji,
     };
+
+    if (plant.autumnPlantDaysBeforeFirstFrost != null && firstFrostDate) {
+      const plantDate = addDays(firstFrostDate, -plant.autumnPlantDaysBeforeFirstFrost);
+      events.push({ ...base, kind: "plant_autumn", date: plantDate, label: "Sätt på hösten" });
+      if (plant.daysToMaturityMin != null) {
+        events.push({ ...base, kind: "harvest_start", date: addDays(plantDate, plant.daysToMaturityMin), label: "Börja skörda" });
+      }
+      if (plant.daysToMaturityMax != null) {
+        events.push({ ...base, kind: "harvest_end", date: addDays(plantDate, plant.daysToMaturityMax), label: "Sista skörd" });
+      }
+      continue;
+    }
 
     if (plant.sowIndoorsDaysBeforeFrost != null) {
       events.push({
@@ -135,6 +150,11 @@ export const KIND_STYLES: Record<
     bg: "bg-emerald-50",
     text: "text-emerald-800",
     dot: "bg-emerald-400",
+  },
+  plant_autumn: {
+    bg: "bg-lime-50",
+    text: "text-lime-800",
+    dot: "bg-lime-500",
   },
   harvest_start: {
     bg: "bg-amber-50",
