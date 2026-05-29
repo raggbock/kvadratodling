@@ -2,7 +2,10 @@
 
 import * as Sentry from '@sentry/nextjs';
 import { useEffect } from 'react';
+import './globals.css';
 
+// global-error replaces the root layout entirely, so it ships its own
+// <html>/<body> and imports globals.css to get the design tokens.
 export default function GlobalError({
   error,
   unstable_retry,
@@ -15,15 +18,20 @@ export default function GlobalError({
   }, [error]);
 
   return (
-    <html>
-      <body className="flex min-h-screen flex-col items-center justify-center bg-gray-50 p-8 text-center">
-        <h2 className="text-xl font-semibold text-gray-900">Something went wrong</h2>
-        <p className="mt-2 text-sm text-gray-500">The error has been reported. Please try again.</p>
+    <html lang="sv">
+      <body className="flex min-h-screen flex-col items-center justify-center bg-surface-page p-8 text-center text-text-default">
+        <div className="text-5xl" aria-hidden>
+          🌧️
+        </div>
+        <h1 className="mt-4 text-2xl font-semibold">Något gick fel</h1>
+        <p className="mt-2 max-w-sm text-sm text-text-subtle">
+          Ett oväntat fel uppstod och har rapporterats. Försök igen om en stund.
+        </p>
         <button
           onClick={unstable_retry}
-          className="mt-4 rounded-md bg-green-700 px-4 py-2 text-sm text-white hover:bg-green-800"
+          className="mt-6 rounded-md bg-brand-default px-5 py-2.5 text-sm font-semibold text-text-inverse hover:bg-brand-emphasis"
         >
-          Try again
+          Försök igen
         </button>
       </body>
     </html>

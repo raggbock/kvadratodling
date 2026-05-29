@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { computeOptimalBeds, summarizeBedSizes } from '@/lib/bedLayout';
 import { track } from '@/lib/analytics';
+import { ConfirmDialog } from '@/components/ConfirmDialog';
 
 interface Bed {
   id: string;
@@ -30,6 +31,7 @@ export function GardenDetailClient({ garden }: { garden: Garden }) {
   const router = useRouter();
   const [generating, setGenerating] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const layout =
     garden.widthCm && garden.lengthCm
@@ -61,8 +63,7 @@ export function GardenDetailClient({ garden }: { garden: Garden }) {
     }
   }
 
-  async function handleDelete() {
-    if (!confirm(`Ta bort trädgården "${garden.name}"? Det går inte att ångra.`)) return;
+  async function doDelete() {
     setDeleting(true);
     try {
       const res = await fetch(`/api/gardens/${garden.id}`, { method: 'DELETE' });
@@ -70,6 +71,7 @@ export function GardenDetailClient({ garden }: { garden: Garden }) {
       router.push('/gardens');
     } catch {
       setDeleting(false);
+      setConfirmOpen(false);
     }
   }
 
@@ -231,13 +233,24 @@ export function GardenDetailClient({ garden }: { garden: Garden }) {
       {/* Delete */}
       <div className="mt-12 border-t border-border-subtle pt-6">
         <button
-          onClick={handleDelete}
+          onClick={() => setConfirmOpen(true)}
           disabled={deleting}
           className="text-sm text-status-negative hover:text-brand-emphasis disabled:opacity-50"
         >
           {deleting ? 'Tar bort…' : 'Ta bort den här odlingen'}
         </button>
       </div>
+
+      <ConfirmDialog
+        open={confirmOpen}
+        title="Ta bort odlingen?"
+        body={`"${garden.name}" och alla dess lådor tas bort permanent. Det går inte att ångra.`}
+        confirmLabel="Ta bort"
+        destructive
+        pending={deleting}
+        onConfirm={doDelete}
+        onCancel={() => setConfirmOpen(false)}
+      />
     </div>
   );
 }
