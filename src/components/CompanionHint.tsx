@@ -1,5 +1,10 @@
+import Link from 'next/link';
+
 /**
- * Renders one companion / antagonist pairing on the plant detail page.
+ * One companion / antagonist pairing on the plant detail page, rendered as a
+ * compact chip that links to the other plant. The reason (notes) is exposed as
+ * a hover tooltip rather than inline, so many pairings stay a couple of wrapped
+ * rows instead of a tall column — the detailed tips also surface in the planner.
  * Takes the other plant's display data directly — no slug lookup, so the
  * component is decoupled from any client-side plant catalog.
  */
@@ -12,25 +17,17 @@ interface Props {
 export function CompanionHint({ kind, other, notes }: Props) {
   const isGood = kind === 'good';
   return (
-    <div
-      className={`flex items-start gap-2 rounded-lg px-3 py-2 text-sm ${
+    <Link
+      href={`/catalog/${other.slug}`}
+      title={notes ?? undefined}
+      className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-sm transition hover:opacity-80 ${
         isGood
-          ? 'bg-status-positive-subtle text-status-positive border border-status-positive'
-          : 'bg-status-negative-subtle text-status-negative border border-status-negative'
+          ? 'border-status-positive bg-status-positive-subtle text-status-positive'
+          : 'border-status-negative bg-status-negative-subtle text-status-negative'
       }`}
     >
-      <span className="mt-0.5 shrink-0 text-base">{isGood ? '✅' : '⚠️'}</span>
-      <div className="min-w-0">
-        <span className="font-medium">
-          {other.emoji} {other.common_name}
-        </span>
-        {notes && (
-          <>
-            {' — '}
-            <span>{notes}</span>
-          </>
-        )}
-      </div>
-    </div>
+      <span aria-hidden>{other.emoji}</span>
+      <span className="font-medium">{other.common_name}</span>
+    </Link>
   );
 }

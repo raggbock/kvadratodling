@@ -292,7 +292,7 @@ export default async function PlantDetailPage({ params }: Props) {
           {companions.length > 0 && (
             <div className="mt-4">
               <h3 className="mb-2 text-sm font-medium text-status-positive">✅ Goda grannar</h3>
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-wrap gap-2">
                 {companions.map((c) => (
                   <CompanionHint
                     key={c.other_plant!.slug}
@@ -308,7 +308,7 @@ export default async function PlantDetailPage({ params }: Props) {
           {antagonists.length > 0 && (
             <div className="mt-4">
               <h3 className="mb-2 text-sm font-medium text-status-negative">⚠️ Dåliga grannar</h3>
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-wrap gap-2">
                 {antagonists.map((c) => (
                   <CompanionHint
                     key={c.other_plant!.slug}
