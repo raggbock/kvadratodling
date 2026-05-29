@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import { createClient } from '@/utils/supabase/server';
 import { computeSchedule, type PlantScheduleInput, type ScheduleEvent } from '@/lib/plantSchedule';
 import { ScheduleView } from '@/components/ScheduleView';
+import { firstFrostMDForLastFrostMD, firstFrostDateForYear } from '@/lib/zones';
 
 const DEFAULT_FROST_MD = '05-01';
 
@@ -51,7 +52,7 @@ export default async function SchedulePage({ params, searchParams }: PageProps) 
   const { data: allPlants } = await supabase
     .from('plants')
     .select(
-      'id, slug, common_name, emoji, sow_indoors_days_before_frost, direct_sow_days_before_frost, transplant_days_after_frost, days_to_maturity_min, days_to_maturity_max',
+      'id, slug, common_name, emoji, sow_indoors_days_before_frost, direct_sow_days_before_frost, transplant_days_after_frost, days_to_maturity_min, days_to_maturity_max, autumn_plant_days_before_first_frost',
     )
     .eq('is_active', true)
     .order('common_name');
@@ -63,6 +64,7 @@ export default async function SchedulePage({ params, searchParams }: PageProps) 
     sowIndoorsDaysBeforeFrost: p.sow_indoors_days_before_frost,
     directSowDaysBeforeFrost: p.direct_sow_days_before_frost,
     transplantDaysAfterFrost: p.transplant_days_after_frost,
+    autumnPlantDaysBeforeFirstFrost: p.autumn_plant_days_before_first_frost,
     daysToMaturityMin: p.days_to_maturity_min,
     daysToMaturityMax: p.days_to_maturity_max,
   }));
@@ -77,7 +79,7 @@ export default async function SchedulePage({ params, searchParams }: PageProps) 
         id, name, last_frost_date,
         beds(planting_slots(plant:plants(id, common_name, emoji,
           sow_indoors_days_before_frost, direct_sow_days_before_frost,
-          transplant_days_after_frost, days_to_maturity_min, days_to_maturity_max)))
+          transplant_days_after_frost, days_to_maturity_min, days_to_maturity_max, autumn_plant_days_before_first_frost)))
       `)
       .eq('id', gardenId)
       .single();
@@ -101,6 +103,7 @@ export default async function SchedulePage({ params, searchParams }: PageProps) 
         sowIndoorsDaysBeforeFrost: p.sow_indoors_days_before_frost,
         directSowDaysBeforeFrost: p.direct_sow_days_before_frost,
         transplantDaysAfterFrost: p.transplant_days_after_frost,
+        autumnPlantDaysBeforeFirstFrost: p.autumn_plant_days_before_first_frost,
         daysToMaturityMin: p.days_to_maturity_min,
         daysToMaturityMax: p.days_to_maturity_max,
       }));
@@ -122,8 +125,9 @@ export default async function SchedulePage({ params, searchParams }: PageProps) 
   const now = startOfDay(new Date());
   const windowEnd = addDays(now, 365);
 
-  const thisYearEvents = computeSchedule(frostDateFor(now.getFullYear(), md), plantsForSchedule);
-  const nextYearEvents = computeSchedule(frostDateFor(now.getFullYear() + 1, md), plantsForSchedule);
+  const autumnMd = firstFrostMDForLastFrostMD(md);
+  const thisYearEvents = computeSchedule(frostDateFor(now.getFullYear(), md), plantsForSchedule, firstFrostDateForYear(autumnMd, now.getFullYear()));
+  const nextYearEvents = computeSchedule(frostDateFor(now.getFullYear() + 1, md), plantsForSchedule, firstFrostDateForYear(autumnMd, now.getFullYear() + 1));
   const events: ScheduleEvent[] = [...thisYearEvents, ...nextYearEvents]
     .filter((e) => e.date >= now && e.date < windowEnd)
     .sort((a, b) => a.date.getTime() - b.date.getTime());
