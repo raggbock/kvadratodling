@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Familjen_Grotesk } from 'next/font/google';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -11,6 +11,13 @@ const familjenGrotesk = Familjen_Grotesk({
   subsets: ['latin'],
   variable: '--font-familjen-grotesk',
 });
+
+// Explicit viewport (Next 16 wants this separate from metadata) so mobile
+// scaling is intentional rather than relying on the framework default.
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+};
 
 // metadataBase lets per-page metadata use relative OG URLs and Next resolves
 // them against the canonical origin. Title template adds "| Kvadratodling"

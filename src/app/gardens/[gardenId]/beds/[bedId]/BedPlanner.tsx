@@ -366,6 +366,7 @@ export default function BedPlanner({
           </div>
         )}
 
+        <div className="-mx-1 overflow-x-auto px-1 pb-2">
         <div
           className="inline-grid gap-1 rounded-xl border border-border-default bg-surface-default p-3 shadow-sm"
           style={gridStyle}
@@ -412,6 +413,7 @@ export default function BedPlanner({
               );
             })
           )}
+          </div>
         </div>
 
         {/* Legend */}
