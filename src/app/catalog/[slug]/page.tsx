@@ -207,7 +207,13 @@ export default async function PlantDetailPage({ params }: Props) {
         </div>
       </div>
 
-      {plant.description && <p className="mt-5 text-text-default">{plant.description}</p>}
+      {plant.description && (
+        <div className="mt-5 max-w-prose space-y-4 leading-relaxed text-text-subtle">
+          {plant.description.split(/\n\s*\n/).map((para, i) => (
+            <p key={i}>{para.trim()}</p>
+          ))}
+        </div>
+      )}
 
       <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Stat label="Per ruta" value={`${plant.plants_per_sqft} st`} />
