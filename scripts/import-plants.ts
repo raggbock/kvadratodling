@@ -45,6 +45,7 @@ const PlantSchema = z.object({
   sow_indoors_days_before_frost: z.number().int().nullable().optional(),
   direct_sow_days_before_frost: z.number().int().nullable().optional(),
   transplant_days_after_frost: z.number().int().nullable().optional(),
+  autumn_plant_days_before_first_frost: z.number().int().nullable().optional(),
 
   zones: z.object({
     min: Zone,
@@ -97,6 +98,7 @@ function toPlantInsert(p: Plant): TablesInsert<'plants'> {
     sow_indoors_days_before_frost: p.sow_indoors_days_before_frost ?? null,
     direct_sow_days_before_frost: p.direct_sow_days_before_frost ?? null,
     transplant_days_after_frost: p.transplant_days_after_frost ?? null,
+    autumn_plant_days_before_first_frost: p.autumn_plant_days_before_first_frost ?? null,
     description: p.description ?? null,
     tips: p.tips ?? null,
     pests: p.pests ?? null,
