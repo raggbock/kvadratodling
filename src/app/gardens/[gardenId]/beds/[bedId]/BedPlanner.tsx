@@ -4,6 +4,7 @@ import { useState, useCallback, useMemo, useEffect } from 'react';
 import { track } from '@/lib/analytics';
 import { PresetMenu } from './PresetMenu';
 import type { Preset, PresetSlot } from '@/lib/presets';
+import { findConflictCells } from '@/lib/companionConflicts';
 
 interface PalettePlant {
   slug: string;
@@ -70,6 +71,32 @@ export default function BedPlanner({
   const gridStyle = useMemo(
     () => ({ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }),
     [cols],
+  );
+
+  // Cells whose plant has an antagonist in an orthogonally adjacent cell.
+  const conflictCells = useMemo(() => {
+    const planted = new Map<string, string>();
+    for (const slot of slots.values()) {
+      if (slot.plantSlug) planted.set(`${slot.row}:${slot.col}`, slot.plantSlug);
+    }
+    return findConflictCells(planted, companions);
+  }, [slots, companions]);
+
+  // Arrow-key navigation between cells, layered on top of native button focus
+  // so a handler bug can never remove basic Tab access.
+  const moveFocus = useCallback(
+    (r: number, c: number, key: string) => {
+      let nr = r;
+      let nc = c;
+      if (key === 'ArrowUp') nr = Math.max(0, r - 1);
+      else if (key === 'ArrowDown') nr = Math.min(rows - 1, r + 1);
+      else if (key === 'ArrowLeft') nc = Math.max(0, c - 1);
+      else if (key === 'ArrowRight') nc = Math.min(cols - 1, c + 1);
+      else return false;
+      document.querySelector<HTMLButtonElement>(`[data-cell="${nr}:${nc}"]`)?.focus();
+      return true;
+    },
+    [rows, cols],
   );
 
   // Companion / antagonist chips for the selected plant. Filter out plants
@@ -366,8 +393,16 @@ export default function BedPlanner({
           </div>
         )}
 
+        {conflictCells.size > 0 && (
+          <div className="mb-3 rounded-md bg-status-warning-subtle px-3 py-2 text-sm text-status-warning">
+            ⚠️ {conflictCells.size} {conflictCells.size === 1 ? 'ruta har en granne' : 'rutor har grannar'} som inte trivs ihop.
+          </div>
+        )}
+
         <div className="-mx-1 overflow-x-auto px-1 pb-2">
         <div
+          role="group"
+          aria-label={`Odlingsbädd, ${cols} kolumner gånger ${rows} rader`}
           className="inline-grid gap-1 rounded-xl border border-border-default bg-surface-default p-3 shadow-sm"
           style={gridStyle}
         >
@@ -379,11 +414,18 @@ export default function BedPlanner({
               const isCurrentPlant = slot?.plantSlug === selectedSlug;
               const cellPlant = slot?.plantSlug ? paletteBySlug.get(slot.plantSlug) : null;
               const perSquare = cellPlant?.plantsPerSqft ?? 0;
+              const cellConflict = conflictCells.has(key);
+              const cellLabel = `Rad ${r + 1}, kolumn ${c + 1}${slot?.plantName ? `, ${slot.plantName}` : ', tom'}${cellConflict ? ', olämplig granne' : ''}`;
 
               return (
                 <button
                   key={key}
+                  data-cell={key}
+                  aria-label={cellLabel}
                   onClick={() => handleCellClick(r, c)}
+                  onKeyDown={(e) => {
+                    if (moveFocus(r, c, e.key)) e.preventDefault();
+                  }}
                   title={
                     slot
                       ? `${slot.plantName}${perSquare >= 2 ? ` (×${perSquare})` : ''} — klicka för att ta bort`
@@ -401,9 +443,15 @@ export default function BedPlanner({
                         : 'border-status-positive bg-status-positive-subtle hover:border-status-negative hover:bg-status-negative-subtle'
                       : 'border-dashed border-border-subtle bg-surface-subtle hover:border-brand-default hover:bg-brand-muted'
                     }
+                    ${cellConflict ? 'outline outline-2 outline-offset-1 outline-status-negative' : ''}
                   `}
                 >
                   {slot ? slot.plantEmoji : ''}
+                  {cellConflict && (
+                    <span className="pointer-events-none absolute -left-1 -top-1 text-xs" aria-hidden>
+                      ⚠️
+                    </span>
+                  )}
                   {perSquare >= 2 && (
                     <span className="pointer-events-none absolute -bottom-0.5 -right-0.5 rounded-bl-md rounded-tr-md bg-surface-default/95 px-1 text-[9px] font-semibold leading-tight text-text-subtle shadow-sm">
                       ×{perSquare}
