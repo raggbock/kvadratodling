@@ -35,3 +35,19 @@ What it does:
 The schema the file is validated against matches the one in the prompt I
 keep in the chat thread — Plant fields like `plants_per_sqft`, `zones.min/max`,
 `companions[].slug`, etc.
+
+## Plant enrichment (source-grounded)
+
+Enrich plant data from approved Swedish sources with real citations and a human
+review gate. The full procedure lives in `data/plants/ENRICHMENT-PROMPT.md`.
+
+Flow per batch:
+
+1. Agent runs the playbook → `data/plants/<batch>.records.json` (provenance).
+2. `npx tsx scripts/enrich-report.ts data/plants/<batch>.records.json <batch>`
+   → `data/plants/review/<batch>.md` (your sign-off gate).
+3. After you approve, the approved fields are written to a Zod-valid
+   `data/plants/<batch>.plants.json` and imported with `npm run import:plants`.
+
+Nothing reaches the DB without your ✓. Facts never come from model memory —
+only from fetched, cited sources in the allowlist.
