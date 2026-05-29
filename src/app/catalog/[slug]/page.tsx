@@ -12,7 +12,8 @@ import {
 } from '@/lib/plant-display';
 import { CompanionHint } from '@/components/CompanionHint';
 import { JsonLd } from '@/components/JsonLd';
-import { SITE_URL, SITE_NAME, DEFAULT_OG_IMAGE } from '@/lib/site';
+import { buildPlantFaq, faqJsonLd } from '@/lib/plant-faq';
+import { SITE_URL, SITE_NAME } from '@/lib/site';
 
 // Build a meta description even when plant.description is empty — derived
 // from structured fields so Google has something better than the title.
@@ -52,7 +53,7 @@ const getPlant = cache(async (slug: string) => {
   const { data } = await supabase
     .from('plants')
     .select(
-      'id, slug, common_name, english_name, scientific_name, family, emoji, plants_per_sqft, sun_requirement, water_need, days_to_maturity_min, days_to_maturity_max, description, tips, pests, diseases, tags, zones_min, zones_max, zones_note',
+      'id, slug, common_name, english_name, scientific_name, family, emoji, plants_per_sqft, sun_requirement, water_need, days_to_maturity_min, days_to_maturity_max, frost_tolerant, sow_indoors_days_before_frost, direct_sow_days_before_frost, transplant_days_after_frost, description, tips, pests, diseases, tags, zones_min, zones_max, zones_note',
     )
     .eq('slug', slug)
     .single();
@@ -81,7 +82,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description,
       url,
       type: 'article',
-      images: [DEFAULT_OG_IMAGE],
+      // No explicit `images` — the per-plant opengraph-image.tsx file convention
+      // generates the og:image. Setting a static default here suppressed it and
+      // served og-default.png for every plant. twitter:image falls back to og.
     },
     twitter: {
       card: 'summary_large_image',
@@ -131,6 +134,27 @@ export default async function PlantDetailPage({ params }: Props) {
   const description = deriveDescription(plant);
   const url = `${SITE_URL}/catalog/${slug}`;
 
+  // FAQ derived purely from verified fields — see the truth contract in
+  // lib/plant-faq.ts. Questions without backing data are omitted.
+  const faq = buildPlantFaq({
+    commonName: plant.common_name,
+    plantsPerSqft: Number(plant.plants_per_sqft),
+    sunRequirement: plant.sun_requirement,
+    waterNeed: plant.water_need,
+    daysToMaturityMin: plant.days_to_maturity_min,
+    daysToMaturityMax: plant.days_to_maturity_max,
+    frostTolerant: plant.frost_tolerant,
+    sowIndoorsDaysBeforeFrost: plant.sow_indoors_days_before_frost,
+    directSowDaysBeforeFrost: plant.direct_sow_days_before_frost,
+    transplantDaysAfterFrost: plant.transplant_days_after_frost,
+    zonesMin: plant.zones_min,
+    zonesMax: plant.zones_max,
+    zonesNote: plant.zones_note,
+    companions: companions.map((c) => c.other_plant!.common_name),
+    antagonists: antagonists.map((c) => c.other_plant!.common_name),
+  });
+  const faqSchema = faq.length > 0 ? faqJsonLd(faq) : null;
+
   // Article schema — Google's closest fit for "informational guide page".
   // We tag it as Article (not Product, which would imply for-sale).
   const articleSchema = {
@@ -165,7 +189,7 @@ export default async function PlantDetailPage({ params }: Props) {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
-      <JsonLd data={[articleSchema, breadcrumb]} />
+      <JsonLd data={faqSchema ? [articleSchema, breadcrumb, faqSchema] : [articleSchema, breadcrumb]} />
       <Link
         href="/catalog"
         className="mb-6 inline-flex items-center gap-1 text-sm text-green-600 hover:text-green-700"
@@ -295,6 +319,31 @@ export default async function PlantDetailPage({ params }: Props) {
         <div className="mt-8 rounded-xl border border-dashed border-gray-200 p-6 text-center text-sm text-gray-400">
           Ingen sällskapsplanterings-data för den här växten ännu.
         </div>
+      )}
+
+      {faq.length > 0 && (
+        <section className="mt-10">
+          <h2 className="text-xl font-semibold text-gray-900">Vanliga frågor</h2>
+          <dl className="mt-4 divide-y divide-gray-100">
+            {faq.map((item) => (
+              <div key={item.question} className="py-4">
+                <dt className="font-medium text-gray-900">{item.question}</dt>
+                <dd className="mt-1 text-sm text-gray-700">{item.answer}</dd>
+              </div>
+            ))}
+          </dl>
+          <p className="mt-4 text-sm text-gray-500">
+            Se{' '}
+            <Link href="/verktyg/frostkalkylator" className="text-green-600 hover:text-green-700">
+              frostkalkylatorn
+            </Link>{' '}
+            och{' '}
+            <Link href="/odlingsschema" className="text-green-600 hover:text-green-700">
+              odlingsschemat
+            </Link>{' '}
+            för datum anpassade efter din zon.
+          </p>
+        </section>
       )}
     </div>
   );
