@@ -150,3 +150,35 @@ export function lastFrostDateForYear(
   const [month, day] = lastFrostMD.split("-").map(Number);
   return new Date(year, month - 1, day);
 }
+
+/** Average first autumn frost as a Date for the given year (mirrors lastFrostDateForYear). */
+export function firstFrostDateForYear(
+  firstFrostMD: string,
+  year = new Date().getFullYear()
+): Date {
+  const [month, day] = firstFrostMD.split("-").map(Number);
+  return new Date(year, month - 1, day);
+}
+
+/**
+ * Map a spring last-frost MD to the first autumn frost MD of the zone whose
+ * spring frost is closest. Used by the personal garden schedule, which works
+ * from a picked spring-frost date rather than a chosen zone.
+ */
+export function firstFrostMDForLastFrostMD(lastFrostMD: string): string {
+  const score = (md: string) => {
+    const [m, d] = md.split("-").map(Number);
+    return m * 100 + d;
+  };
+  const target = score(lastFrostMD);
+  let best = SWEDISH_ZONES[0];
+  let bestDiff = Infinity;
+  for (const z of SWEDISH_ZONES) {
+    const diff = Math.abs(score(z.lastFrostMD) - target);
+    if (diff < bestDiff) {
+      bestDiff = diff;
+      best = z;
+    }
+  }
+  return best.firstFrostMD;
+}
