@@ -268,6 +268,7 @@ export type Database = {
           sun_requirement: Database["public"]["Enums"]["sun_requirement"]
           tags: string[] | null
           tips: string | null
+          autumn_plant_days_before_first_frost: number | null
           transplant_days_after_frost: number | null
           water_need: Database["public"]["Enums"]["water_need"]
           zones_max: string | null
@@ -298,6 +299,7 @@ export type Database = {
           sun_requirement: Database["public"]["Enums"]["sun_requirement"]
           tags?: string[] | null
           tips?: string | null
+          autumn_plant_days_before_first_frost?: number | null
           transplant_days_after_frost?: number | null
           water_need: Database["public"]["Enums"]["water_need"]
           zones_max?: string | null
@@ -328,6 +330,7 @@ export type Database = {
           sun_requirement?: Database["public"]["Enums"]["sun_requirement"]
           tags?: string[] | null
           tips?: string | null
+          autumn_plant_days_before_first_frost?: number | null
           transplant_days_after_frost?: number | null
           water_need?: Database["public"]["Enums"]["water_need"]
           zones_max?: string | null
