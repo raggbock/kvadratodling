@@ -192,7 +192,7 @@ export default async function PlantDetailPage({ params }: Props) {
       <JsonLd data={faqSchema ? [articleSchema, breadcrumb, faqSchema] : [articleSchema, breadcrumb]} />
       <Link
         href="/catalog"
-        className="mb-6 inline-flex items-center gap-1 text-sm text-green-600 hover:text-green-700"
+        className="mb-6 inline-flex items-center gap-1 text-sm text-text-link hover:text-brand-emphasis"
       >
         ← Tillbaka till katalogen
       </Link>
@@ -202,12 +202,12 @@ export default async function PlantDetailPage({ params }: Props) {
           {plant.emoji}
         </span>
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">{plant.common_name}</h1>
-          {subtitle && <p className="text-gray-400">{subtitle}</p>}
+          <h1 className="text-3xl font-bold tracking-tight text-text-default">{plant.common_name}</h1>
+          {subtitle && <p className="text-text-muted">{subtitle}</p>}
         </div>
       </div>
 
-      {plant.description && <p className="mt-5 text-gray-700">{plant.description}</p>}
+      {plant.description && <p className="mt-5 text-text-default">{plant.description}</p>}
 
       <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Stat label="Per ruta" value={`${plant.plants_per_sqft} st`} />
@@ -223,22 +223,22 @@ export default async function PlantDetailPage({ params }: Props) {
       </div>
 
       {(plant.zones_min || plant.zones_max) && (
-        <div className="mt-4 rounded-xl border border-gray-100 bg-gray-50 px-4 py-3">
-          <p className="text-xs text-gray-400">Odlingszoner</p>
-          <p className="mt-0.5 text-sm font-medium text-gray-800">
+        <div className="mt-4 rounded-xl border border-border-subtle bg-surface-subtle px-4 py-3">
+          <p className="text-xs text-text-muted">Odlingszoner</p>
+          <p className="mt-0.5 text-sm font-medium text-text-default">
             {plant.zones_min}
             {plant.zones_min && plant.zones_max && plant.zones_min !== plant.zones_max
               ? `–${plant.zones_max}`
               : ''}
-            {plant.zones_note && <span className="ml-2 font-normal text-gray-500">— {plant.zones_note}</span>}
+            {plant.zones_note && <span className="ml-2 font-normal text-text-subtle">— {plant.zones_note}</span>}
           </p>
         </div>
       )}
 
       {plant.tips && (
-        <div className="mt-6 rounded-xl border border-amber-100 bg-amber-50 px-4 py-3">
-          <p className="text-sm font-medium text-amber-800">💡 Tips</p>
-          <p className="mt-1 text-sm text-amber-700">{plant.tips}</p>
+        <div className="mt-6 rounded-xl border border-status-warning bg-status-warning-subtle px-4 py-3">
+          <p className="text-sm font-medium text-status-warning">💡 Tips</p>
+          <p className="mt-1 text-sm text-status-warning">{plant.tips}</p>
         </div>
       )}
 
@@ -247,7 +247,7 @@ export default async function PlantDetailPage({ params }: Props) {
           {plant.tags.map((tag) => (
             <span
               key={tag}
-              className="rounded-full bg-green-50 px-3 py-1 text-xs font-medium text-green-600"
+              className="rounded-full bg-status-positive-subtle px-3 py-1 text-xs font-medium text-status-positive"
             >
               {tag}
             </span>
@@ -258,19 +258,19 @@ export default async function PlantDetailPage({ params }: Props) {
       {((plant.pests && plant.pests.length > 0) || (plant.diseases && plant.diseases.length > 0)) && (
         <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
           {plant.pests && plant.pests.length > 0 && (
-            <div className="rounded-xl border border-gray-100 bg-gray-50 px-4 py-3">
-              <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+            <div className="rounded-xl border border-border-subtle bg-surface-subtle px-4 py-3">
+              <p className="text-xs font-semibold uppercase tracking-wide text-text-muted">
                 Skadegörare
               </p>
-              <p className="mt-1 text-sm text-gray-700">{plant.pests.join(', ')}</p>
+              <p className="mt-1 text-sm text-text-default">{plant.pests.join(', ')}</p>
             </div>
           )}
           {plant.diseases && plant.diseases.length > 0 && (
-            <div className="rounded-xl border border-gray-100 bg-gray-50 px-4 py-3">
-              <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+            <div className="rounded-xl border border-border-subtle bg-surface-subtle px-4 py-3">
+              <p className="text-xs font-semibold uppercase tracking-wide text-text-muted">
                 Sjukdomar
               </p>
-              <p className="mt-1 text-sm text-gray-700">{plant.diseases.join(', ')}</p>
+              <p className="mt-1 text-sm text-text-default">{plant.diseases.join(', ')}</p>
             </div>
           )}
         </div>
@@ -278,14 +278,14 @@ export default async function PlantDetailPage({ params }: Props) {
 
       {companions.length > 0 || antagonists.length > 0 ? (
         <div className="mt-8">
-          <h2 className="text-xl font-semibold text-gray-900">Sällskapsplantering</h2>
-          <p className="mt-1 text-sm text-gray-500">
+          <h2 className="text-xl font-semibold text-text-default">Sällskapsplantering</h2>
+          <p className="mt-1 text-sm text-text-subtle">
             Tipsen visas i planeraren när grannrutorna är upptagna.
           </p>
 
           {companions.length > 0 && (
             <div className="mt-4">
-              <h3 className="mb-2 text-sm font-medium text-green-700">✅ Goda grannar</h3>
+              <h3 className="mb-2 text-sm font-medium text-status-positive">✅ Goda grannar</h3>
               <div className="flex flex-col gap-2">
                 {companions.map((c) => (
                   <CompanionHint
@@ -301,7 +301,7 @@ export default async function PlantDetailPage({ params }: Props) {
 
           {antagonists.length > 0 && (
             <div className="mt-4">
-              <h3 className="mb-2 text-sm font-medium text-red-700">⚠️ Dåliga grannar</h3>
+              <h3 className="mb-2 text-sm font-medium text-status-negative">⚠️ Dåliga grannar</h3>
               <div className="flex flex-col gap-2">
                 {antagonists.map((c) => (
                   <CompanionHint
@@ -316,29 +316,29 @@ export default async function PlantDetailPage({ params }: Props) {
           )}
         </div>
       ) : (
-        <div className="mt-8 rounded-xl border border-dashed border-gray-200 p-6 text-center text-sm text-gray-400">
+        <div className="mt-8 rounded-xl border border-dashed border-border-default p-6 text-center text-sm text-text-muted">
           Ingen sällskapsplanterings-data för den här växten ännu.
         </div>
       )}
 
       {faq.length > 0 && (
         <section className="mt-10">
-          <h2 className="text-xl font-semibold text-gray-900">Vanliga frågor</h2>
-          <dl className="mt-4 divide-y divide-gray-100">
+          <h2 className="text-xl font-semibold text-text-default">Vanliga frågor</h2>
+          <dl className="mt-4 divide-y divide-border-subtle">
             {faq.map((item) => (
               <div key={item.question} className="py-4">
-                <dt className="font-medium text-gray-900">{item.question}</dt>
-                <dd className="mt-1 text-sm text-gray-700">{item.answer}</dd>
+                <dt className="font-medium text-text-default">{item.question}</dt>
+                <dd className="mt-1 text-sm text-text-default">{item.answer}</dd>
               </div>
             ))}
           </dl>
-          <p className="mt-4 text-sm text-gray-500">
+          <p className="mt-4 text-sm text-text-subtle">
             Se{' '}
-            <Link href="/verktyg/frostkalkylator" className="text-green-600 hover:text-green-700">
+            <Link href="/verktyg/frostkalkylator" className="text-text-link hover:text-brand-emphasis">
               frostkalkylatorn
             </Link>{' '}
             och{' '}
-            <Link href="/odlingsschema" className="text-green-600 hover:text-green-700">
+            <Link href="/odlingsschema" className="text-text-link hover:text-brand-emphasis">
               odlingsschemat
             </Link>{' '}
             för datum anpassade efter din zon.
@@ -351,9 +351,9 @@ export default async function PlantDetailPage({ params }: Props) {
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg border border-gray-100 bg-gray-50 px-3 py-2">
-      <p className="text-xs text-gray-400">{label}</p>
-      <p className="mt-0.5 text-sm font-medium text-gray-800">{value}</p>
+    <div className="rounded-lg border border-border-subtle bg-surface-subtle px-3 py-2">
+      <p className="text-xs text-text-muted">{label}</p>
+      <p className="mt-0.5 text-sm font-medium text-text-default">{value}</p>
     </div>
   );
 }

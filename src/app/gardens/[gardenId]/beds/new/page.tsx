@@ -62,17 +62,17 @@ export default function NewBedPage() {
 
   return (
     <div className="mx-auto max-w-md px-4 py-10 sm:px-6">
-      <div className="mb-2 text-sm text-gray-500">
-        <Link href={`/gardens/${gardenId}`} className="hover:text-green-700">
+      <div className="mb-2 text-sm text-text-subtle">
+        <Link href={`/gardens/${gardenId}`} className="hover:text-brand-emphasis">
           Odling
         </Link>{' '}
         /
       </div>
-      <h1 className="mb-6 text-2xl font-bold text-gray-900">Lägg till odlingslåda</h1>
+      <h1 className="mb-6 text-2xl font-bold text-text-default">Lägg till odlingslåda</h1>
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">
-            Namn <span className="text-red-500">*</span>
+          <label className="mb-1 block text-sm font-medium text-text-default">
+            Namn <span className="text-status-negative">*</span>
           </label>
           <input
             type="text"
@@ -80,12 +80,12 @@ export default function NewBedPage() {
             onChange={(e) => setName(e.target.value)}
             placeholder="t.ex. Södra pallkragen"
             required
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+            className="w-full rounded-md border border-border-default px-3 py-2 text-sm shadow-sm focus:border-brand-default focus:outline-none focus:ring-1 focus:ring-brand-default"
           />
         </div>
 
         <div>
-          <label className="mb-2 block text-sm font-medium text-gray-700">Vanliga pallkrage-storlekar</label>
+          <label className="mb-2 block text-sm font-medium text-text-default">Vanliga pallkrage-storlekar</label>
           <div className="grid grid-cols-2 gap-2">
             {PRESETS.map((p) => {
               const isActive = widthCm === p.widthCm && lengthCm === p.lengthCm;
@@ -96,8 +96,8 @@ export default function NewBedPage() {
                   onClick={() => applyPreset(p)}
                   className={`rounded-md border px-3 py-2 text-sm font-medium transition ${
                     isActive
-                      ? 'border-green-500 bg-green-50 text-green-700'
-                      : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+                      ? 'border-brand-default bg-brand-muted text-text-link'
+                      : 'border-border-default bg-surface-default text-text-default hover:bg-surface-subtle'
                   }`}
                 >
                   {p.label}
@@ -108,7 +108,7 @@ export default function NewBedPage() {
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">Egna mått</label>
+          <label className="mb-1 block text-sm font-medium text-text-default">Egna mått</label>
           <div className="flex items-center gap-2">
             <div className="relative flex-1">
               <input
@@ -120,13 +120,13 @@ export default function NewBedPage() {
                 onChange={(e) => setWidthCm(Number(e.target.value))}
                 placeholder="Bredd"
                 aria-label="Bredd i centimeter"
-                className="w-full rounded-md border border-gray-300 px-3 py-2 pr-10 text-sm shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                className="w-full rounded-md border border-border-default px-3 py-2 pr-10 text-sm shadow-sm focus:border-brand-default focus:outline-none focus:ring-1 focus:ring-brand-default"
               />
-              <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">
+              <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-text-muted">
                 cm
               </span>
             </div>
-            <span className="shrink-0 text-gray-400">×</span>
+            <span className="shrink-0 text-text-muted">×</span>
             <div className="relative flex-1">
               <input
                 type="number"
@@ -137,24 +137,24 @@ export default function NewBedPage() {
                 onChange={(e) => setLengthCm(Number(e.target.value))}
                 placeholder="Längd"
                 aria-label="Längd i centimeter"
-                className="w-full rounded-md border border-gray-300 px-3 py-2 pr-10 text-sm shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                className="w-full rounded-md border border-border-default px-3 py-2 pr-10 text-sm shadow-sm focus:border-brand-default focus:outline-none focus:ring-1 focus:ring-brand-default"
               />
-              <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">
+              <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-text-muted">
                 cm
               </span>
             </div>
           </div>
         </div>
 
-        <div className="rounded-lg border border-green-200 bg-green-50 p-3 text-sm">
-          <p className="font-medium text-green-800">
+        <div className="rounded-lg border border-brand-subtle bg-brand-muted p-3 text-sm">
+          <p className="font-medium text-text-default">
             {cols} × {rows} rutor ({cols * rows} totalt)
           </p>
-          <p className="mt-0.5 text-xs text-green-700">
+          <p className="mt-0.5 text-xs text-text-subtle">
             Planeras som {usedWidthCm} × {usedLengthCm} cm. Varje ruta är 30×30 cm.
           </p>
           {(widthOverflow > 0 || lengthOverflow > 0) && (
-            <p className="mt-1 text-xs text-amber-700">
+            <p className="mt-1 text-xs text-status-warning">
               Dina mått ligger inte exakt på rutnätet —{' '}
               {widthOverflow > 0 && `${widthOverflow} cm överblir i bredd`}
               {widthOverflow > 0 && lengthOverflow > 0 && ', '}
@@ -164,19 +164,19 @@ export default function NewBedPage() {
           )}
         </div>
 
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && <p className="text-sm text-status-negative">{error}</p>}
         <div className="flex gap-3">
           <button
             type="submit"
             disabled={loading || !name.trim()}
-            className="flex-1 rounded-md bg-green-600 py-2 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-50"
+            className="flex-1 rounded-md bg-brand-default py-2 text-sm font-semibold text-white hover:bg-brand-emphasis disabled:opacity-50"
           >
             {loading ? 'Skapar…' : 'Skapa pallkrage'}
           </button>
           <button
             type="button"
             onClick={() => router.back()}
-            className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            className="rounded-md border border-border-default bg-surface-default px-4 py-2 text-sm font-medium text-text-default hover:bg-surface-subtle"
           >
             Avbryt
           </button>

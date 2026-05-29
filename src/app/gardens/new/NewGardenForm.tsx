@@ -76,11 +76,11 @@ export default function NewGardenForm() {
 
   return (
     <div className="mx-auto max-w-lg px-4 py-10 sm:px-6">
-      <h1 className="mb-6 text-2xl font-bold text-gray-900">Ny odling</h1>
+      <h1 className="mb-6 text-2xl font-bold text-text-default">Ny odling</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">
-            Namn <span className="text-red-500">*</span>
+          <label className="mb-1 block text-sm font-medium text-text-default">
+            Namn <span className="text-status-negative">*</span>
           </label>
           <input
             type="text"
@@ -88,24 +88,24 @@ export default function NewGardenForm() {
             onChange={(e) => setName(e.target.value)}
             placeholder="t.ex. Pallkrage på altanen"
             required
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+            className="w-full rounded-md border border-border-default px-3 py-2 text-sm shadow-sm focus:border-brand-default focus:outline-none focus:ring-1 focus:ring-brand-default"
           />
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">Beskrivning</label>
+          <label className="mb-1 block text-sm font-medium text-text-default">Beskrivning</label>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={3}
             placeholder="Valfri beskrivning"
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+            className="w-full rounded-md border border-border-default px-3 py-2 text-sm shadow-sm focus:border-brand-default focus:outline-none focus:ring-1 focus:ring-brand-default"
           />
         </div>
 
         {/* Dimensions */}
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">
+          <label className="mb-1 block text-sm font-medium text-text-default">
             Storlek på din yta
           </label>
           <div className="flex items-center gap-2">
@@ -119,13 +119,13 @@ export default function NewGardenForm() {
                 onChange={(e) => setWidthM(e.target.value)}
                 placeholder="Bredd"
                 aria-label="Bredd i meter"
-                className="w-full rounded-md border border-gray-300 px-3 py-2 pr-8 text-sm shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                className="w-full rounded-md border border-border-default px-3 py-2 pr-8 text-sm shadow-sm focus:border-brand-default focus:outline-none focus:ring-1 focus:ring-brand-default"
               />
-              <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">
+              <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-text-muted">
                 m
               </span>
             </div>
-            <span className="shrink-0 text-gray-400">×</span>
+            <span className="shrink-0 text-text-muted">×</span>
             <div className="relative flex-1">
               <input
                 type="number"
@@ -136,33 +136,33 @@ export default function NewGardenForm() {
                 onChange={(e) => setLengthM(e.target.value)}
                 placeholder="Längd"
                 aria-label="Längd i meter"
-                className="w-full rounded-md border border-gray-300 px-3 py-2 pr-8 text-sm shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                className="w-full rounded-md border border-border-default px-3 py-2 pr-8 text-sm shadow-sm focus:border-brand-default focus:outline-none focus:ring-1 focus:ring-brand-default"
               />
-              <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">
+              <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-text-muted">
                 m
               </span>
             </div>
           </div>
-          <p className="mt-1 text-xs text-gray-400">
+          <p className="mt-1 text-xs text-text-muted">
             Ange ytan i meter (0,3–100). Odlingslådor räknas ut automatiskt när du öppnar odlingen.
           </p>
 
           {layout && layout.beds.length > 0 && (
-            <div className="mt-3 rounded-lg border border-green-200 bg-green-50 p-3">
-              <p className="text-sm font-medium text-green-800">
+            <div className="mt-3 rounded-lg border border-brand-subtle bg-brand-muted p-3">
+              <p className="text-sm font-medium text-text-default">
                 Optimerat layout: {layout.beds.length} odlingslåda{layout.beds.length !== 1 ? 'r' : ''}
               </p>
-              <p className="mt-0.5 text-xs text-green-700">
+              <p className="mt-0.5 text-xs text-text-subtle">
                 {summarizeBedSizes(layout.beds).map((g) => `${g.count} à ${g.size} cm`).join(' + ')}
               </p>
-              <p className="mt-0.5 text-xs text-green-600">
+              <p className="mt-0.5 text-xs text-text-subtle">
                 Totalt: {layout.beds.reduce((s, b) => s + b.rows * b.cols, 0)} odlingsrutor à 30×30 cm
               </p>
             </div>
           )}
 
           {layout && layout.beds.length === 0 && widthM && lengthM && (
-            <p className="mt-2 text-xs text-amber-600">
+            <p className="mt-2 text-xs text-status-warning">
               Ytan är för liten för en standardlåda (min 120 × 30 cm). Försök med större mått.
             </p>
           )}
@@ -170,7 +170,7 @@ export default function NewGardenForm() {
 
         {/* Zone picker */}
         <div>
-          <p className="mb-2 block text-sm font-medium text-gray-700">
+          <p className="mb-2 block text-sm font-medium text-text-default">
             Odlingszon — klicka din region på kartan
           </p>
           <div className="flex items-start gap-4">
@@ -180,20 +180,20 @@ export default function NewGardenForm() {
             <div className="flex-1 min-w-0 pt-1">
               {selectedZone ? (
                 <div className="space-y-1.5">
-                  <p className="text-sm font-semibold text-gray-900">
+                  <p className="text-sm font-semibold text-text-default">
                     {selectedZone.id}: {selectedZone.nameSv}
                   </p>
-                  <p className="text-xs leading-relaxed text-gray-500">
+                  <p className="text-xs leading-relaxed text-text-subtle">
                     {selectedZone.description}
                   </p>
-                  <div className="space-y-0.5 text-xs text-gray-400">
+                  <div className="space-y-0.5 text-xs text-text-muted">
                     <p>Sista frost: ~{frostDateLabel(selectedZone.lastFrostMD)}</p>
                     <p>Frostfria dagar: ~{selectedZone.frostFreeDays}</p>
-                    <p className="text-gray-300">{selectedZone.cities.slice(0, 3).join(', ')}</p>
+                    <p className="text-text-muted">{selectedZone.cities.slice(0, 3).join(', ')}</p>
                   </div>
                 </div>
               ) : (
-                <p className="text-sm italic text-gray-400">
+                <p className="text-sm italic text-text-muted">
                   Klicka din region på kartan, eller välj från listan nedanför.
                 </p>
               )}
@@ -204,7 +204,7 @@ export default function NewGardenForm() {
             <select
               value={zoneId}
               onChange={(e) => handleZoneChange(e.target.value)}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+              className="w-full rounded-md border border-border-default px-3 py-2 text-sm shadow-sm focus:border-brand-default focus:outline-none focus:ring-1 focus:ring-brand-default"
             >
               <option value="">— Välj din region —</option>
               {SWEDISH_ZONES.map((z) => (
@@ -217,45 +217,45 @@ export default function NewGardenForm() {
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">Plats</label>
+          <label className="mb-1 block text-sm font-medium text-text-default">Plats</label>
           <input
             type="text"
             value={location}
             onChange={(e) => setLocation(e.target.value)}
             placeholder="t.ex. Stockholm"
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+            className="w-full rounded-md border border-border-default px-3 py-2 text-sm shadow-sm focus:border-brand-default focus:outline-none focus:ring-1 focus:ring-brand-default"
           />
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">
+          <label className="mb-1 block text-sm font-medium text-text-default">
             Sista frostdag
           </label>
           <input
             type="date"
             value={lastFrostDate}
             onChange={(e) => setLastFrostDate(e.target.value)}
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+            className="w-full rounded-md border border-border-default px-3 py-2 text-sm shadow-sm focus:border-brand-default focus:outline-none focus:ring-1 focus:ring-brand-default"
           />
-          <p className="mt-1 text-xs text-gray-400">
+          <p className="mt-1 text-xs text-text-muted">
             Fylls i automatiskt när du väljer en odlingszon. Du kan ändra den.
           </p>
         </div>
 
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && <p className="text-sm text-status-negative">{error}</p>}
 
         <div className="flex gap-3 pt-2">
           <button
             type="submit"
             disabled={loading || !name.trim()}
-            className="flex-1 rounded-md bg-green-600 py-2 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-50"
+            className="flex-1 rounded-md bg-brand-default py-2 text-sm font-semibold text-white hover:bg-brand-emphasis disabled:opacity-50"
           >
             {loading ? 'Skapar…' : 'Skapa odling'}
           </button>
           <button
             type="button"
             onClick={() => router.back()}
-            className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            className="rounded-md border border-border-default bg-surface-default px-4 py-2 text-sm font-medium text-text-default hover:bg-surface-subtle"
           >
             Avbryt
           </button>

@@ -15,8 +15,8 @@ export function CompanionHint({ kind, other, notes }: Props) {
     <div
       className={`flex items-start gap-2 rounded-lg px-3 py-2 text-sm ${
         isGood
-          ? 'bg-green-50 text-green-800 border border-green-200'
-          : 'bg-red-50 text-red-800 border border-red-200'
+          ? 'bg-status-positive-subtle text-status-positive border border-status-positive'
+          : 'bg-status-negative-subtle text-status-negative border border-status-negative'
       }`}
     >
       <span className="mt-0.5 shrink-0 text-base">{isGood ? '✅' : '⚠️'}</span>

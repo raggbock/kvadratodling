@@ -196,16 +196,16 @@ export default function BedPlanner({
     <div className="flex flex-col gap-6 lg:flex-row">
       {/* Plant palette + companion hints */}
       <aside className="w-full flex-shrink-0 space-y-4 lg:w-64">
-        <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
-          <div className="border-b border-gray-100 px-4 py-3">
-            <h2 className="text-sm font-semibold text-gray-700">Växtpalett</h2>
+        <div className="rounded-xl border border-border-default bg-surface-default shadow-sm">
+          <div className="border-b border-border-subtle px-4 py-3">
+            <h2 className="text-sm font-semibold text-text-subtle">Växtpalett</h2>
             <button
               onClick={() => setSelectedSlug(null)}
               disabled={palette.length === 0}
               className={`mt-2 w-full rounded-md border px-3 py-1.5 text-sm transition disabled:cursor-not-allowed disabled:opacity-40 ${
                 selectedSlug === null && palette.length > 0
-                  ? 'border-red-400 bg-red-50 font-medium text-red-700'
-                  : 'border-gray-300 text-gray-500 hover:bg-gray-50'
+                  ? 'border-status-negative bg-status-negative-subtle font-medium text-status-negative'
+                  : 'border-border-default text-text-subtle hover:bg-surface-subtle'
               }`}
             >
               🗑 Raderingsläge
@@ -213,7 +213,7 @@ export default function BedPlanner({
           </div>
           <div className="p-3">
             {palette.length === 0 ? (
-              <p className="px-1 py-4 text-center text-xs text-gray-500">
+              <p className="px-1 py-4 text-center text-xs text-text-subtle">
                 Inga växter i katalogen än.
               </p>
             ) : (
@@ -223,7 +223,7 @@ export default function BedPlanner({
                   placeholder="Sök växter…"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="mb-2 w-full rounded-md border border-gray-200 px-2 py-1.5 text-sm focus:border-green-400 focus:outline-none"
+                  className="mb-2 w-full rounded-md border border-border-subtle px-2 py-1.5 text-sm focus:border-brand-default focus:outline-none"
                 />
                 <ul className="max-h-[50vh] overflow-y-auto space-y-0.5">
                   {filteredPlants.map((plant) => (
@@ -232,15 +232,15 @@ export default function BedPlanner({
                         onClick={() => setSelectedSlug(plant.slug)}
                         className={`flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm transition ${
                           selectedSlug === plant.slug
-                            ? 'bg-green-100 font-medium text-green-800 ring-1 ring-green-300'
-                            : 'text-gray-700 hover:bg-gray-50'
+                            ? 'bg-status-positive-subtle font-medium text-status-positive ring-1 ring-status-positive'
+                            : 'text-text-default hover:bg-surface-subtle'
                         }`}
                       >
                         <span className="text-base">{plant.emoji}</span>
                         <span className="flex-1">{plant.name}</span>
                         {plant.plantsPerSqft >= 2 && (
                           <span
-                            className="rounded-sm bg-gray-100 px-1 text-[10px] font-medium text-gray-500"
+                            className="rounded-sm bg-surface-subtle px-1 text-[10px] font-medium text-text-muted"
                             title={`${plant.plantsPerSqft} plantor per ruta`}
                           >
                             ×{plant.plantsPerSqft}
@@ -257,14 +257,14 @@ export default function BedPlanner({
 
         {/* Selected plant detail — per-ruta count + companions/antagonists */}
         {selectedPlant && (
-          <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-            <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-500">
+          <div className="rounded-xl border border-border-default bg-surface-default p-4 shadow-sm">
+            <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-text-muted">
               Vald växt
             </p>
-            <p className="text-sm font-semibold text-gray-900">
+            <p className="text-sm font-semibold text-text-default">
               {selectedPlant.emoji} {selectedPlant.name}
             </p>
-            <p className="mt-0.5 text-xs text-gray-500">
+            <p className="mt-0.5 text-xs text-text-subtle">
               {selectedPlant.plantsPerSqft >= 2
                 ? `${selectedPlant.plantsPerSqft} plantor per ruta — en klick = ${selectedPlant.plantsPerSqft} ${selectedPlant.name.toLowerCase()}`
                 : selectedPlant.plantsPerSqft === 1
@@ -274,13 +274,13 @@ export default function BedPlanner({
 
             {selectedNeighbours.good.length > 0 && (
               <div className="mt-3">
-                <p className="mb-1.5 text-xs font-medium text-green-700">🤝 Bra grannar</p>
+                <p className="mb-1.5 text-xs font-medium text-status-positive">🤝 Bra grannar</p>
                 <div className="flex flex-wrap gap-1.5">
                   {selectedNeighbours.good.map((p) => (
                     <button
                       key={p.slug}
                       onClick={() => setSelectedSlug(p.slug)}
-                      className="flex items-center gap-1 rounded-full border border-green-200 bg-green-50 px-2 py-0.5 text-xs text-green-800 transition hover:border-green-400 hover:bg-green-100"
+                      className="flex items-center gap-1 rounded-full border border-status-positive bg-status-positive-subtle px-2 py-0.5 text-xs text-status-positive transition hover:bg-status-positive-subtle"
                       title={`Klicka för att välja ${p.name}`}
                     >
                       <span>{p.emoji}</span>
@@ -293,12 +293,12 @@ export default function BedPlanner({
 
             {selectedNeighbours.bad.length > 0 && (
               <div className="mt-3">
-                <p className="mb-1.5 text-xs font-medium text-red-700">⚠️ Dåliga grannar</p>
+                <p className="mb-1.5 text-xs font-medium text-status-negative">⚠️ Dåliga grannar</p>
                 <div className="flex flex-wrap gap-1.5">
                   {selectedNeighbours.bad.map((p) => (
                     <span
                       key={p.slug}
-                      className="flex items-center gap-1 rounded-full border border-red-200 bg-red-50 px-2 py-0.5 text-xs text-red-800"
+                      className="flex items-center gap-1 rounded-full border border-status-negative bg-status-negative-subtle px-2 py-0.5 text-xs text-status-negative"
                       title={`Undvik att plantera bredvid ${p.name}`}
                     >
                       <span>{p.emoji}</span>
@@ -310,7 +310,7 @@ export default function BedPlanner({
             )}
 
             {selectedNeighbours.good.length === 0 && selectedNeighbours.bad.length === 0 && (
-              <p className="mt-3 text-xs italic text-gray-400">
+              <p className="mt-3 text-xs italic text-text-muted">
                 Ingen sällskapsdata för den här växten ännu.
               </p>
             )}
@@ -321,7 +321,7 @@ export default function BedPlanner({
       {/* Grid + stats */}
       <div className="flex-1">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-3 text-sm text-gray-500">
+          <div className="flex items-center gap-3 text-sm text-text-subtle">
             <span>
               {filledCount} / {total} rutor planterade
             </span>
@@ -333,41 +333,41 @@ export default function BedPlanner({
               onApply={handleApplyPreset}
             />
           </div>
-          <div className="flex items-center gap-3 text-sm text-gray-500">
+          <div className="flex items-center gap-3 text-sm text-text-subtle">
             <span aria-live="polite" className="text-xs">
               {isSaving ? (
-                <span className="text-gray-400">Sparar…</span>
+                <span className="text-text-muted">Sparar…</span>
               ) : savedAt ? (
-                <span className="text-green-700">Sparat ✓</span>
+                <span className="text-status-positive">Sparat ✓</span>
               ) : (
-                <span className="text-gray-300">Sparas automatiskt</span>
+                <span className="text-text-muted">Sparas automatiskt</span>
               )}
             </span>
             <span>
               {palette.length === 0 ? (
-                <span className="text-amber-600">Välj först en växt i katalogen</span>
+                <span className="text-status-warning">Välj först en växt i katalogen</span>
               ) : selectedPlant ? (
                 <>
                   Planterar{' '}
-                  <strong className="text-gray-700">
+                  <strong className="text-text-default">
                     {selectedPlant.emoji} {selectedPlant.name}
                   </strong>
                 </>
               ) : (
-                <strong className="text-red-600">Raderingsläge</strong>
+                <strong className="text-status-negative">Raderingsläge</strong>
               )}
             </span>
           </div>
         </div>
 
         {saveError && (
-          <div className="mb-3 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
+          <div className="mb-3 rounded-md bg-status-negative-subtle px-3 py-2 text-sm text-status-negative">
             {saveError}
           </div>
         )}
 
         <div
-          className="inline-grid gap-1 rounded-xl border border-gray-200 bg-white p-3 shadow-sm"
+          className="inline-grid gap-1 rounded-xl border border-border-default bg-surface-default p-3 shadow-sm"
           style={gridStyle}
         >
           {Array.from({ length: rows }, (_, r) =>
@@ -393,18 +393,18 @@ export default function BedPlanner({
                   className={`
                     relative flex h-12 w-12 items-center justify-center rounded-lg border text-2xl transition select-none
                     sm:h-14 sm:w-14
-                    ${cellSaving ? 'ring-1 ring-green-200' : ''}
+                    ${cellSaving ? 'ring-1 ring-brand-subtle' : ''}
                     ${slot
                       ? isCurrentPlant
-                        ? 'border-green-400 bg-green-50 ring-2 ring-green-300 hover:bg-red-50 hover:ring-red-200'
-                        : 'border-green-300 bg-green-50 hover:border-red-300 hover:bg-red-50'
-                      : 'border-dashed border-gray-200 bg-gray-50 hover:border-green-300 hover:bg-green-50'
+                        ? 'border-status-positive bg-status-positive-subtle ring-2 ring-status-positive hover:bg-status-negative-subtle hover:ring-status-negative'
+                        : 'border-status-positive bg-status-positive-subtle hover:border-status-negative hover:bg-status-negative-subtle'
+                      : 'border-dashed border-border-subtle bg-surface-subtle hover:border-brand-default hover:bg-brand-muted'
                     }
                   `}
                 >
                   {slot ? slot.plantEmoji : ''}
                   {perSquare >= 2 && (
-                    <span className="pointer-events-none absolute -bottom-0.5 -right-0.5 rounded-bl-md rounded-tr-md bg-white/95 px-1 text-[9px] font-semibold leading-tight text-gray-600 shadow-sm">
+                    <span className="pointer-events-none absolute -bottom-0.5 -right-0.5 rounded-bl-md rounded-tr-md bg-surface-default/95 px-1 text-[9px] font-semibold leading-tight text-text-subtle shadow-sm">
                       ×{perSquare}
                     </span>
                   )}
@@ -416,8 +416,8 @@ export default function BedPlanner({
 
         {/* Legend */}
         {slots.size > 0 && (
-          <div className="mt-4 rounded-lg border border-gray-100 bg-white p-3">
-            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
+          <div className="mt-4 rounded-lg border border-border-subtle bg-surface-default p-3">
+            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-text-muted">
               Det här är planterat
             </h3>
             <div className="flex flex-wrap gap-2">
@@ -428,7 +428,7 @@ export default function BedPlanner({
                 return (
                   <span
                     key={item.slug}
-                    className="flex items-center gap-1 rounded-full bg-green-50 px-2.5 py-1 text-xs text-green-800"
+                    className="flex items-center gap-1 rounded-full bg-status-positive-subtle px-2.5 py-1 text-xs text-status-positive"
                     title={
                       per >= 2
                         ? `${item.count} rutor × ${per} = ${totalPlants} ${item.name?.toLowerCase()}`
@@ -436,7 +436,7 @@ export default function BedPlanner({
                     }
                   >
                     {item.emoji} {item.name}{' '}
-                    <span className="rounded-full bg-green-200 px-1.5 font-medium">
+                    <span className="rounded-full bg-status-positive px-1.5 font-medium text-white">
                       {per >= 2 ? `${item.count}r · ${totalPlants}` : item.count}
                     </span>
                   </span>

@@ -55,7 +55,7 @@ export function PresetMenu({ rows, cols, palette, existingCount, onApply }: Prop
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-1.5 rounded-md border border-green-300 bg-green-50 px-3 py-1.5 text-sm font-medium text-green-800 transition hover:border-green-400 hover:bg-green-100"
+        className="inline-flex items-center gap-1.5 rounded-md border border-brand-subtle bg-brand-muted px-3 py-1.5 text-sm font-medium text-text-link transition hover:border-brand-default hover:bg-brand-subtle"
       >
         ✨ Använd preset
       </button>
@@ -116,16 +116,16 @@ function PresetList({
 }) {
   return (
     <>
-      <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
+      <div className="flex items-center justify-between border-b border-border-subtle px-5 py-4">
         <div>
-          <h2 className="text-lg font-semibold text-gray-900">Välj en preset</h2>
-          <p className="mt-0.5 text-xs text-gray-500">
+          <h2 className="text-lg font-semibold text-text-default">Välj en preset</h2>
+          <p className="mt-0.5 text-xs text-text-subtle">
             Optimerade planteringar för din bädd ({rows} × {cols} rutor).
           </p>
         </div>
         <button
           onClick={onClose}
-          className="rounded-md p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+          className="rounded-md p-2 text-text-muted hover:bg-surface-subtle hover:text-text-subtle"
           aria-label="Stäng"
         >
           ✕
@@ -133,11 +133,11 @@ function PresetList({
       </div>
 
       {presets.length === 0 ? (
-        <div className="px-5 py-8 text-center text-sm text-gray-500">
+        <div className="px-5 py-8 text-center text-sm text-text-subtle">
           Inga presets passar bädden — den är för liten eller saknar växter i katalogen.
         </div>
       ) : (
-        <ul className="divide-y divide-gray-100">
+        <ul className="divide-y divide-border-subtle">
           {presets.map((preset) => {
             const slots = applyPreset(rows, cols, preset);
             const breakdown = new Map<string, number>();
@@ -146,14 +146,14 @@ function PresetList({
               <li key={preset.id}>
                 <button
                   onClick={() => onPick(preset)}
-                  className="flex w-full items-start gap-4 px-5 py-4 text-left transition hover:bg-green-50"
+                  className="flex w-full items-start gap-4 px-5 py-4 text-left transition hover:bg-brand-muted"
                 >
                   <span className="mt-0.5 text-3xl" aria-hidden>
                     {preset.emoji}
                   </span>
                   <div className="flex-1">
-                    <h3 className="font-semibold text-gray-900">{preset.name}</h3>
-                    <p className="mt-0.5 text-sm text-gray-500">{preset.description}</p>
+                    <h3 className="font-semibold text-text-default">{preset.name}</h3>
+                    <p className="mt-0.5 text-sm text-text-subtle">{preset.description}</p>
                     <div className="mt-2 flex flex-wrap gap-1.5">
                       {Array.from(breakdown.entries()).map(([slug, count]) => {
                         const plant = palette.get(slug);
@@ -164,10 +164,10 @@ function PresetList({
                         return (
                           <span
                             key={slug}
-                            className="flex items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-700"
+                            className="flex items-center gap-1 rounded-full bg-surface-subtle px-2 py-0.5 text-xs text-text-default"
                           >
                             {plant.emoji} {plant.name}
-                            <span className="text-gray-500">
+                            <span className="text-text-muted">
                               · {count}r{plant.plantsPerSqft >= 2 ? ` (${totalPlants})` : ''}
                             </span>
                           </span>
@@ -213,13 +213,13 @@ function ConfirmStep({
 
   return (
     <>
-      <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
-        <h2 className="text-lg font-semibold text-gray-900">
+      <div className="flex items-center justify-between border-b border-border-subtle px-5 py-4">
+        <h2 className="text-lg font-semibold text-text-default">
           {preset.emoji} {preset.name} — förhandsvisning
         </h2>
         <button
           onClick={onCancel}
-          className="rounded-md p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+          className="rounded-md p-2 text-text-muted hover:bg-surface-subtle hover:text-text-subtle"
           aria-label="Tillbaka"
         >
           ←
@@ -228,7 +228,7 @@ function ConfirmStep({
 
       <div className="px-5 py-5">
         <div
-          className="mx-auto inline-grid gap-1 rounded-lg border border-gray-200 bg-gray-50 p-2"
+          className="mx-auto inline-grid gap-1 rounded-lg border border-border-default bg-surface-subtle p-2"
           style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
         >
           {Array.from({ length: rows }, (_, r) =>
@@ -238,7 +238,7 @@ function ConfirmStep({
               return (
                 <div
                   key={`${r}:${c}`}
-                  className="flex h-10 w-10 items-center justify-center rounded border border-green-200 bg-green-50 text-lg sm:h-11 sm:w-11"
+                  className="flex h-10 w-10 items-center justify-center rounded border border-status-positive bg-status-positive-subtle text-lg sm:h-11 sm:w-11"
                   title={plant?.name ?? ''}
                 >
                   {plant?.emoji ?? ''}
@@ -249,7 +249,7 @@ function ConfirmStep({
         </div>
 
         {existingCount > 0 && (
-          <div className="mt-4 rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-800">
+          <div className="mt-4 rounded-md bg-status-warning-subtle px-3 py-2 text-sm text-status-warning">
             ⚠️ Bädden innehåller redan {existingCount} planterade rutor som kommer att skrivas över.
           </div>
         )}
@@ -259,7 +259,7 @@ function ConfirmStep({
             type="button"
             onClick={onCancel}
             disabled={pending}
-            className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+            className="rounded-md border border-border-default bg-surface-default px-4 py-2 text-sm font-medium text-text-default hover:bg-surface-subtle disabled:opacity-50"
           >
             Avbryt
           </button>
@@ -267,7 +267,7 @@ function ConfirmStep({
             type="button"
             onClick={onConfirm}
             disabled={pending}
-            className="rounded-md bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-50"
+            className="rounded-md bg-brand-default px-4 py-2 text-sm font-semibold text-white hover:bg-brand-emphasis disabled:opacity-50"
           >
             {pending ? 'Applicerar…' : `Applicera ${preset.name}`}
           </button>

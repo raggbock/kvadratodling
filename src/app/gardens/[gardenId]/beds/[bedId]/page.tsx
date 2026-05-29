@@ -93,25 +93,25 @@ export default async function BedPage({
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mb-2 text-sm text-gray-500">
-        <Link href="/gardens" className="hover:text-green-700">
+      <div className="mb-2 text-sm text-text-subtle">
+        <Link href="/gardens" className="hover:text-brand-emphasis">
           Mina odlingar
         </Link>{' '}
         /{' '}
-        <Link href={`/gardens/${gardenId}`} className="hover:text-green-700">
+        <Link href={`/gardens/${gardenId}`} className="hover:text-brand-emphasis">
           {garden.name}
         </Link>{' '}
         /
       </div>
       <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">{bed.name}</h1>
-          <p className="mt-1 text-sm text-gray-500">
+          <h1 className="text-2xl font-bold text-text-default">{bed.name}</h1>
+          <p className="mt-1 text-sm text-text-subtle">
             {bed.width_cm ?? bed.cols * 30}×{bed.length_cm ?? bed.rows * 30} cm
             &mdash; {bed.cols} × {bed.rows} rutor
             {((bed.width_cm ?? bed.cols * 30) > bed.cols * 30 ||
               (bed.length_cm ?? bed.rows * 30) > bed.rows * 30) && (
-              <span className="ml-2 text-xs text-amber-600">
+              <span className="ml-2 text-xs text-status-warning">
                 (planeras som {bed.cols * 30}×{bed.rows * 30} cm — resten är utanför rutnätet)
               </span>
             )}
@@ -119,7 +119,7 @@ export default async function BedPage({
         </div>
         <Link
           href={`/gardens/${gardenId}`}
-          className="inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          className="inline-flex items-center gap-1.5 rounded-md border border-border-default bg-surface-default px-3 py-2 text-sm font-medium text-text-default hover:bg-surface-subtle"
         >
           ← Tillbaka till {garden.name}
         </Link>
