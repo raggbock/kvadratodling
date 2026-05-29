@@ -64,7 +64,7 @@ export default function Home() {
             style={{ color: 'var(--color-text-subtle)' }}
           >
             Hjälper dig välja vad, när och hur du odlar med kvadratmetoden.
-            25 växter, sällskapsplantering och ett odlingsschema som följer din sista frost.
+            100+ växter, sällskapsplantering och ett odlingsschema som följer din sista frost.
           </p>
           <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Link
@@ -103,7 +103,7 @@ export default function Home() {
             },
             {
               illus: '/assets/illus-morot.svg',
-              title: '25 växter att välja mellan',
+              title: '100+ växter att välja mellan',
               body: 'Tomat, sallad, morot, ärt och fler. Klicka i en ruta för att plantera, klicka igen för att tömma.',
             },
             {
