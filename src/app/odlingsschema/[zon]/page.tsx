@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation';
 import { createClient } from '@/utils/supabase/server';
 import { JsonLd } from '@/components/JsonLd';
 import { SITE_URL, SITE_NAME } from '@/lib/site';
-import { SWEDISH_ZONES, lastFrostDateForYear } from '@/lib/zones';
+import { SWEDISH_ZONES, lastFrostDateForYear, firstFrostDateForYear } from '@/lib/zones';
 import { computeSchedule, type ScheduleEvent, KIND_STYLES, type ScheduleEventKind } from '@/lib/plantSchedule';
 
 // Cache aggressively — this is fully derived from zone data and the plant
@@ -69,7 +69,7 @@ export default async function OdlingsschemaZonPage({ params }: Props) {
   const supabase = await createClient();
   const { data: plants } = await supabase
     .from('plants')
-    .select('id, slug, common_name, emoji, sow_indoors_days_before_frost, direct_sow_days_before_frost, transplant_days_after_frost, days_to_maturity_min, days_to_maturity_max')
+    .select('id, slug, common_name, emoji, sow_indoors_days_before_frost, direct_sow_days_before_frost, transplant_days_after_frost, days_to_maturity_min, days_to_maturity_max, autumn_plant_days_before_first_frost')
     .eq('is_active', true)
     .order('common_name');
 
@@ -80,13 +80,15 @@ export default async function OdlingsschemaZonPage({ params }: Props) {
     sowIndoorsDaysBeforeFrost: p.sow_indoors_days_before_frost,
     directSowDaysBeforeFrost: p.direct_sow_days_before_frost,
     transplantDaysAfterFrost: p.transplant_days_after_frost,
+    autumnPlantDaysBeforeFirstFrost: p.autumn_plant_days_before_first_frost,
     daysToMaturityMin: p.days_to_maturity_min,
     daysToMaturityMax: p.days_to_maturity_max,
   }));
 
   const referenceYear = new Date().getFullYear();
   const frostDate = lastFrostDateForYear(zone.lastFrostMD, referenceYear);
-  const events = computeSchedule(frostDate, plantInputs);
+  const firstFrostDate = firstFrostDateForYear(zone.firstFrostMD, referenceYear);
+  const events = computeSchedule(frostDate, plantInputs, firstFrostDate);
 
   // Group by month-of-year (independent of year so future/past flows together)
   const byMonth = new Map<number, ScheduleEvent[]>();
