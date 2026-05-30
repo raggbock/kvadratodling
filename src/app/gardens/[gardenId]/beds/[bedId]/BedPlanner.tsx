@@ -316,6 +316,17 @@ export default function BedPlanner({
           body: JSON.stringify({ slots: newSlots }),
         });
         if (!res.ok) throw new Error('Preset apply failed');
+        // Record the diff so the preset can be undone.
+        const changes: Action = [];
+        const keys = new Set<string>([...previous.keys(), ...next.keys()]);
+        for (const key of keys) {
+          const before = previous.get(key) ?? null;
+          const after = next.get(key) ?? null;
+          if ((before?.plantSlug ?? null) !== (after?.plantSlug ?? null)) {
+            changes.push({ key, before, after });
+          }
+        }
+        if (changes.length > 0) setUndoStack((s) => pushAction(s, changes));
         track({ name: 'preset_applied', properties: { preset_id: preset.id, bed_id: bedId, slot_count: newSlots.length } });
         setSavedAt(Date.now());
       } catch {
