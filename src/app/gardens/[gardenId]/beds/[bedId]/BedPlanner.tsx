@@ -166,6 +166,27 @@ export default function BedPlanner({
     [persist],
   );
 
+  const handleUndo = useCallback(() => {
+    if (undoStack.length === 0) return;
+    const last = undoStack[undoStack.length - 1];
+    setUndoStack((s) => s.slice(0, -1));
+    commit(invertChanges(last), { pushUndo: false });
+    track({ name: 'planner_undo', properties: { bed_id: bedId } });
+  }, [undoStack, commit, bedId]);
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      const target = e.target as HTMLElement | null;
+      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA')) return;
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'z' && !e.shiftKey) {
+        e.preventDefault();
+        handleUndo();
+      }
+    }
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [handleUndo]);
+
   const handleCellClick = useCallback(
     (row: number, col: number) => {
       if (suppressClick.current) { suppressClick.current = false; return; }
@@ -439,6 +460,15 @@ export default function BedPlanner({
             <span>
               {filledCount} / {total} rutor planterade
             </span>
+            <button
+              type="button"
+              onClick={handleUndo}
+              disabled={undoStack.length === 0}
+              title="Ångra (Ctrl/Cmd+Z)"
+              className="inline-flex items-center gap-1.5 rounded-md border border-border-default bg-surface-default px-3 py-1.5 text-sm font-medium text-text-default transition hover:bg-surface-subtle disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              ↩ Ångra
+            </button>
             <PresetMenu
               rows={rows}
               cols={cols}
