@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { track } from '@/lib/analytics';
 import { PresetMenu } from './PresetMenu';
 import type { Preset, PresetSlot } from '@/lib/presets';
 import { findConflictCells } from '@/lib/companionConflicts';
-import { applyChanges, invertChanges, pushAction, type SlotData, type Action } from '@/lib/plannerActions';
+import { applyChanges, invertChanges, pushAction, type SlotData, type Action, type CellChange } from '@/lib/plannerActions';
 
 interface PalettePlant {
   slug: string;
@@ -168,6 +168,7 @@ export default function BedPlanner({
 
   const handleCellClick = useCallback(
     (row: number, col: number) => {
+      if (suppressClick.current) { suppressClick.current = false; return; }
       const key = `${row}:${col}`;
       const previous = slots.get(key) ?? null;
       const isSamePlant = previous?.plantSlug === selectedSlug;
@@ -183,6 +184,85 @@ export default function BedPlanner({
     },
     [slots, selectedSlug, paletteBySlug, bedId, commit],
   );
+
+  // Pointer drag-to-paint (mouse/pen only — touch keeps tap-to-place to avoid
+  // fighting the horizontal scroll wrapper). A drag applies the current mode
+  // (paint selectedSlug, or erase when selectedSlug is null) to every cell.
+  const dragRef = useRef<{ active: boolean; startKey: string | null; didDrag: boolean }>({
+    active: false,
+    startKey: null,
+    didDrag: false,
+  });
+  const dragChanges = useRef<Map<string, CellChange>>(new Map());
+  const suppressClick = useRef(false);
+
+  // The mode-aware change for one cell (set selectedSlug, or clear when null).
+  // Returns null when the cell already matches (no change to record).
+  const paintChangeFor = useCallback(
+    (row: number, col: number): CellChange | null => {
+      const key = `${row}:${col}`;
+      const previous = slots.get(key) ?? null;
+      const plant = selectedSlug ? paletteBySlug.get(selectedSlug) : null;
+      const after: SlotData | null = selectedSlug
+        ? { row, col, plantSlug: selectedSlug, plantEmoji: plant?.emoji ?? null, plantName: plant?.name ?? null }
+        : null;
+      if ((previous?.plantSlug ?? null) === (after?.plantSlug ?? null)) return null;
+      return { key, before: previous, after };
+    },
+    [slots, selectedSlug, paletteBySlug],
+  );
+
+  const startDrag = useCallback((row: number, col: number, e: React.PointerEvent) => {
+    if (e.pointerType === 'touch' || e.button !== 0) return; // touch/non-primary → onClick handles it
+    dragRef.current = { active: true, startKey: `${row}:${col}`, didDrag: false };
+    dragChanges.current = new Map();
+  }, []);
+
+  const extendDrag = useCallback(
+    (row: number, col: number, e: React.PointerEvent) => {
+      const d = dragRef.current;
+      if (!d.active || e.pointerType === 'touch') return;
+      const key = `${row}:${col}`;
+      if (!d.didDrag) {
+        if (key === d.startKey) return; // still on the start cell — not a drag yet
+        d.didDrag = true;
+        const [sr, sc] = d.startKey!.split(':').map(Number);
+        const startCh = paintChangeFor(sr, sc); // paint the start cell too
+        if (startCh) {
+          dragChanges.current.set(startCh.key, startCh);
+          setSlots((p) => applyChanges(p, [startCh]));
+        }
+      }
+      if (dragChanges.current.has(key)) return;
+      const ch = paintChangeFor(row, col);
+      if (ch) {
+        dragChanges.current.set(key, ch);
+        setSlots((p) => applyChanges(p, [ch])); // live preview
+      }
+    },
+    [paintChangeFor],
+  );
+
+  // End the drag on window pointerup (even if released outside the grid).
+  useEffect(() => {
+    function end() {
+      const d = dragRef.current;
+      if (!d.active) return;
+      d.active = false;
+      if (!d.didDrag) return; // it was a click → leave it to onClick
+      const changes = [...dragChanges.current.values()];
+      dragChanges.current = new Map();
+      suppressClick.current = true; // swallow the click that fires after pointerup
+      commit(changes); // re-applies same values (idempotent) + pushes undo + persists
+      track({ name: 'plants_painted', properties: { bed_id: bedId, count: changes.length } });
+    }
+    window.addEventListener('pointerup', end);
+    window.addEventListener('pointercancel', end);
+    return () => {
+      window.removeEventListener('pointerup', end);
+      window.removeEventListener('pointercancel', end);
+    };
+  }, [commit, bedId]);
 
   const filledCount = slots.size;
   const total = rows * cols;
@@ -430,6 +510,8 @@ export default function BedPlanner({
                   data-cell={key}
                   aria-label={cellLabel}
                   onClick={() => handleCellClick(r, c)}
+                  onPointerDown={(e) => startDrag(r, c, e)}
+                  onPointerEnter={(e) => extendDrag(r, c, e)}
                   onKeyDown={(e) => {
                     if (moveFocus(r, c, e.key)) e.preventDefault();
                   }}
