@@ -5,20 +5,13 @@ import { track } from '@/lib/analytics';
 import { PresetMenu } from './PresetMenu';
 import type { Preset, PresetSlot } from '@/lib/presets';
 import { findConflictCells } from '@/lib/companionConflicts';
+import { applyChanges, invertChanges, pushAction, type SlotData, type Action } from '@/lib/plannerActions';
 
 interface PalettePlant {
   slug: string;
   name: string;
   emoji: string;
   plantsPerSqft: number;
-}
-
-interface SlotData {
-  row: number;
-  col: number;
-  plantSlug: string | null;
-  plantEmoji: string | null;
-  plantName: string | null;
 }
 
 interface BedPlannerProps {
@@ -48,6 +41,7 @@ export default function BedPlanner({
   const [search, setSearch] = useState('');
   const [savedAt, setSavedAt] = useState<number | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [undoStack, setUndoStack] = useState<Action[]>([]);
 
   const paletteBySlug = useMemo(() => new Map(palette.map((p) => [p.slug, p])), [palette]);
   const selectedPlant = selectedSlug ? paletteBySlug.get(selectedSlug) ?? null : null;
@@ -117,64 +111,77 @@ export default function BedPlanner({
     return () => clearTimeout(id);
   }, [savedAt]);
 
+  // Persist a set of changes via the bulk endpoint, marking the affected cells
+  // pending. On failure: roll back the optimistic state and report the error.
+  const persist = useCallback(
+    async (changes: Action, onRollback: () => void) => {
+      const keys = changes.map((c) => c.key);
+      setPendingSaves((prev) => {
+        const next = new Set(prev);
+        for (const k of keys) next.add(k);
+        return next;
+      });
+      try {
+        const res = await fetch(`/api/beds/${bedId}/slots`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            changes: changes.map((c) => ({
+              row: c.after?.row ?? c.before!.row,
+              col: c.after?.col ?? c.before!.col,
+              plantSlug: c.after?.plantSlug ?? null,
+            })),
+          }),
+        });
+        if (!res.ok) throw new Error('Save failed');
+        setSavedAt(Date.now());
+      } catch {
+        onRollback();
+        setSaveError('Kunde inte spara — kontrollera att du är online och försök igen.');
+      } finally {
+        setPendingSaves((prev) => {
+          const next = new Set(prev);
+          for (const k of keys) next.delete(k);
+          return next;
+        });
+      }
+    },
+    [bedId],
+  );
+
+  // The single path every mutation goes through. Applies optimistically, pushes
+  // to the undo stack (unless this IS an undo), and persists.
+  const commit = useCallback(
+    (changes: Action, opts: { pushUndo?: boolean } = {}) => {
+      if (changes.length === 0) return;
+      const pushUndo = opts.pushUndo ?? true;
+      setSlots((prev) => applyChanges(prev, changes));
+      if (pushUndo) setUndoStack((s) => pushAction(s, changes));
+      setSaveError(null);
+      void persist(changes, () => {
+        setSlots((prev) => applyChanges(prev, invertChanges(changes)));
+        if (pushUndo) setUndoStack((s) => s.slice(0, -1));
+      });
+    },
+    [persist],
+  );
+
   const handleCellClick = useCallback(
     (row: number, col: number) => {
       const key = `${row}:${col}`;
-      const previous = slots.get(key);
+      const previous = slots.get(key) ?? null;
       const isSamePlant = previous?.plantSlug === selectedSlug;
       const newSlug = isSamePlant ? null : selectedSlug;
       const plant = newSlug ? paletteBySlug.get(newSlug) : null;
-
-      setSlots((prev) => {
-        const next = new Map(prev);
-        if (newSlug === null) next.delete(key);
-        else next.set(key, {
-          row, col, plantSlug: newSlug,
-          plantEmoji: plant?.emoji ?? null,
-          plantName: plant?.name ?? null,
-        });
-        return next;
-      });
-      setPendingSaves((prev) => {
-        const next = new Set(prev);
-        next.add(key);
-        return next;
-      });
-      setSaveError(null);
-
-      void (async () => {
-        try {
-          const res = await fetch(`/api/beds/${bedId}/slots`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ row, col, plantSlug: newSlug }),
-          });
-          if (!res.ok) throw new Error('Save failed');
-
-          if (newSlug === null) {
-            track({ name: 'plant_removed', properties: { bed_id: bedId, row, col } });
-          } else {
-            track({ name: 'plant_added', properties: { plant_slug: newSlug, bed_id: bedId, row, col } });
-          }
-          setSavedAt(Date.now());
-        } catch {
-          setSlots((prev) => {
-            const next = new Map(prev);
-            if (previous) next.set(key, previous);
-            else next.delete(key);
-            return next;
-          });
-          setSaveError('Kunde inte spara — kontrollera att du är online och försök igen.');
-        } finally {
-          setPendingSaves((prev) => {
-            const next = new Set(prev);
-            next.delete(key);
-            return next;
-          });
-        }
-      })();
+      const after: SlotData | null = newSlug
+        ? { row, col, plantSlug: newSlug, plantEmoji: plant?.emoji ?? null, plantName: plant?.name ?? null }
+        : null;
+      if ((previous?.plantSlug ?? null) === (after?.plantSlug ?? null)) return; // no-op
+      if (newSlug === null) track({ name: 'plant_removed', properties: { bed_id: bedId, row, col } });
+      else track({ name: 'plant_added', properties: { plant_slug: newSlug, bed_id: bedId, row, col } });
+      commit([{ key, before: previous, after }]);
     },
-    [bedId, selectedSlug, slots, paletteBySlug],
+    [slots, selectedSlug, paletteBySlug, bedId, commit],
   );
 
   const filledCount = slots.size;
